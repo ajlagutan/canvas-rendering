@@ -1,192 +1,439 @@
 import "fpsmeter";
-import { KeyboardInput } from "./Inputs";
+import * as dat from "dat.gui";
+import * as Scenes from "../scenes";
+import { SceneConstructor } from "./Interfaces";
 import { SceneBase } from "./SceneBase";
 /**
- * Fixed time step; 60 frames per second.
+ * A static class that manages the scenes.
+ *
+ *
+ *
+ *
+ *
+ * @static
+ * @class
  */
-const step = 1 / 60;
-/**
- * The {@link SceneManager} class, manages the active scene state.
- */
-export class SceneManager {
-  private _accumulatedTime: number = 0;
-  private _background: string | null = null;
-  private _canvas: HTMLCanvasElement;
-  private _context: CanvasRenderingContext2D | null = null;
-  private _fpsmeter: FPSMeter | null = null;
-  private _scene: SceneBase | null = null;
-  private _showFpsMeter: boolean = true;
-  private _timestamp: number = 0;
-  private _running: boolean = false;
+export abstract class SceneManager {
+  private static _canvas: HTMLCanvasElement | null = null;
+  private static _context: CanvasRenderingContext2D | null = null;
+  private static _debugCanvas: HTMLCanvasElement | null = null;
+  private static _debugContext: CanvasRenderingContext2D | null = null;
+  private static _debugInfo: any = {};
+  private static _debugMetrics: TextMetrics | null = null;
+  private static _debugVisible: boolean = false;
+  private static _fpsmeter: FPSMeter | null = null;
+  private static _fpsmeterVisible: boolean = false;
+  private static _frames: number = 165;
+  private static _frameStep: number = 1 / this._frames;
+  private static _controller: dat.GUI | null = null;
+  private static _running: boolean = false;
+  private static _scene: SceneBase | null = null;
+  private static _sceneController: dat.GUI | null = null;
+  private static _sceneCtor: string | null = null;
+  private static _timeAcc: number = 0;
+  private static _timeMs: number = 0;
   /**
-   * Creates a new instance of SceneManager class.
-   * @param canvas An optional {@link HTMLCanvasElement} instance.
+   * Gets or sets the visibility of the fpsmeter component.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns boolean
    */
-  constructor(canvas: HTMLCanvasElement | null = null) {
-    if (!canvas) {
-      canvas = document.createElement("canvas");
-      canvas.textContent =
-        "Your browser does not support the HTML5 Canvas element.";
-      document.body.insertBefore(canvas, document.body.firstChild);
-    }
-    this._canvas = canvas;
-    this._canvas.width = window.innerWidth;
-    this._canvas.height = window.innerHeight;
-    this._context = canvas.getContext("2d");
-    this._fpsmeter = new FPSMeter(document.body, {
-      graph: 1,
-      decimals: 0,
-      theme: "colorful",
-      toggleOn: "click",
-    });
-    this._fpsmeter.show();
+  public static get fpsmeterVisible(): boolean {
+    return this._fpsmeterVisible;
   }
   /**
-   * Gets or sets the background color of the defined
-   * {@link HTMLCanvasElement} on this scene manager instance.
+   * @param value The visibility to set the fpsmeter component.
    */
-  public get background(): string | null {
-    return this._background;
-  }
-  public set background(v: string | null) {
-    if (this._background !== v) {
-      this._background = v;
-    }
-  }
-  /**
-   * Gets the {@link HTMLCanvasElement}
-   * defined on this scene manager instance.
-   */
-  public get canvas(): HTMLCanvasElement {
-    return this._canvas;
-  }
-  /**
-   * Gets the {@link CanvasRenderingContext2D}
-   * defined on this scene manager instance.
-   */
-  public get context(): CanvasRenderingContext2D | null {
-    return this._context;
-  }
-  /**
-   * Gets the running state of the loop.
-   */
-  public get running(): boolean {
-    return this._running;
-  }
-  /**
-   * Gets or sets the visibility of the
-   * {@link FPSMeter} defined on the scene manager.
-   */
-  public get showFpsMeter(): boolean {
-    return this._showFpsMeter;
-  }
-  public set showFpsMeter(v: boolean) {
-    if (v) {
+  public static set fpsmeterVisible(value: boolean) {
+    this._fpsmeterVisible = value;
+    if (this._fpsmeterVisible) {
       this._fpsmeter?.show();
     } else {
       this._fpsmeter?.hide();
     }
-    this._showFpsMeter = v;
   }
-  /** Gets or sets the currently active scene. */
-  public get scene(): SceneBase | null {
+  /**
+   * Gets or sets the frames per second.
+   *
+   *
+   *
+   *
+   *
+   * @returns number
+   */
+  public static get frames(): number {
+    return this._frames;
+  }
+  /**
+   * @param value The value to assign as a frames per second.
+   */
+  public static set frames(value: number) {
+    this._frames = value;
+    this._frameStep = 1 / this._frames;
+  }
+  /**
+   * Gets the running state of the scene manager.
+   *
+   *
+   *
+   *
+   *
+   * @returns boolean
+   */
+  public static get running(): boolean {
+    return this._running;
+  }
+  /**
+   * Gets or sets the current scene.
+   *
+   *
+   *
+   *
+   *
+   * @returns SceneBase
+   */
+  public static get scene(): SceneBase | null {
     return this._scene;
   }
-  public set scene(s: SceneBase | null) {
-    this._scene = s;
+  /**
+   * @param value The value to assign as an active scene.
+   */
+  public static set scene(value: SceneBase | null) {
+    if (value) {
+      if (this._controller) {
+        if (this._sceneController) {
+          this._controller.removeFolder(this._sceneController);
+        }
+        this._sceneController = value.controller(this._controller);
+      }
+      if (this._sceneController) {
+        this._sceneController.open();
+      }
+      value.resize(
+        this._canvas?.width || window.innerWidth,
+        this._canvas?.height || window.innerHeight
+      );
+    }
+    this._scene = value;
   }
-  public initialize() {
-    KeyboardInput.initialize();
+  /**
+   * Gets or sets the scene constructor.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns string | null
+   */
+  public static get sceneCtor(): string | null {
+    return this._sceneCtor;
+  }
+  /**
+   * @param value The name of the scene constructor.
+   */
+  public static set sceneCtor(value: string | null) {
+    this._sceneCtor = value;
+    if (this._sceneCtor && this._sceneCtor !== "") {
+      const c: SceneConstructor = Object.assign(Scenes)[this._sceneCtor];
+      const s: SceneBase = new c();
+      this.scene = s;
+    } else {
+      this.scene = null;
+    }
+  }
+  /**
+   * Initializes the manager class.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  public static initialize(): void {
+    this.initializeGraphics();
+    this.initializeGui();
+    this.initializeFpsmeter();
+    this.initializeDebug();
     this.hookWindowEvents();
   }
   /**
-   * Resets the background color of the defined
-   * {@link HTMLCanvasElement} on this scene manager instance.
+   * Starts the scene update and canvas rendering.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
    */
-  public resetBackground(): void {
-    this.background = null;
-  }
-  /**
-   * Starts the updating scene and rendering to the defined {@link HTMLCanvasElement}.
-   */
-  public start(): void {
+  public static start(): void {
     if (!this._running) {
       this._running = true;
       requestAnimationFrame(this.loop.bind(this));
     }
   }
   /**
-   * Stops the updates and render.
+   * Stops the scene update.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
    */
-  public stop(): void {
+  public static stop(): void {
     this._running = false;
   }
-  private eventWindowResize(e: UIEvent): void {
-    this._canvas.width = window.innerWidth;
-    this._canvas.height = window.innerHeight;
-  }
-  private hookWindowEvents(): void {
-    window.addEventListener("resize", this.eventWindowResize.bind(this));
-  }
-  private initializeComponents(): void {
-    KeyboardInput.initialize();
+  /**
+   * Initializes the scene attributes component.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static initializeDebug(): void {
+    this._debugCanvas = document.querySelector("canvas#debug");
+    if (!this._debugCanvas) {
+      this._debugCanvas = document.createElement("canvas");
+      this._debugCanvas.id = "debug";
+      this._debugCanvas.style.display = this._debugVisible ? "inline" : "none";
+    }
+    document.body.appendChild(this._debugCanvas);
+    this._debugContext = this._debugCanvas.getContext("2d");
   }
   /**
-   * Renders a scene on to the {@link HTMLCanvasElement} defined on the scene manager.
-   * @param scene The scene to render on to the {@link HTMLCanvasElement}.
+   * Initializes the fpsmeter component.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
    */
-  private renderScene(): void {
+  private static initializeFpsmeter(): void {
+    this._fpsmeter = new FPSMeter(document.body, {
+      graph: 1,
+      decimals: 0,
+      theme: "transparent",
+      toggleOn: undefined,
+    });
+    this._fpsmeter.hide();
+  }
+  /**
+   * Initializes the canvas to render graphics.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static initializeGraphics(): void {
+    this._canvas = document.querySelector<HTMLCanvasElement>("canvas");
+    if (!this._canvas) {
+      this._canvas = document.createElement("canvas");
+      this._canvas.style.backgroundColor = "black";
+      this._canvas.style.zIndex = "-1";
+      this._canvas.style.position = "fixed";
+      this._canvas.style.left = "0";
+      this._canvas.style.top = "0";
+    }
+    document.body.insertBefore(this._canvas, document.body.firstChild);
+    this._context = this._canvas.getContext("2d");
+  }
+  /**
+   * Initializes the dat.Gui component.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  private static initializeGui(): void {
+    const scenes = Object.keys(Scenes);
+
+    this._controller = new dat.GUI({ hideable: false, width: 300 });
+    
+    const settings = this._controller.addFolder("settings");
+    settings.add(this, "frames", 30, 165, 5).name("frames/sec");
+    settings.add(this, "fpsmeterVisible", false).name("show fpsmeter");
+    settings.open();
+
+    const scene = this._controller.addFolder("scenes");
+    scene.add(this, "sceneCtor", []).options(scenes).name("scene").setValue(scenes[0]);
+    scene.open();
+  }
+  /**
+   * Hooks browser window events to the scene manager.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static hookWindowEvents(): void {
+    window.addEventListener("resize", this.windowResizeEvent.bind(this));
+    window.dispatchEvent(
+      new UIEvent("resize", { cancelable: false, bubbles: true })
+    );
+  }
+  private static state: number = 0;
+  /**
+   * The main loop.
+   *
+   *
+   *
+   *
+   *
+   * @param timeMs The time elapsed in milliseconds.
+   * @returns void
+   */
+  private static loop(timeMs: number): void {
+    this.tickStart();
+    try {
+      let deltaTime = (timeMs - this._timeMs) / 1000;
+      this._timeMs = timeMs;
+      this._timeAcc += deltaTime;
+      while (this._timeAcc >= this._frameStep) {
+        this._timeAcc -= this._frameStep;
+        this.update(this._frameStep);
+      }
+      this.render();
+    } catch (error) {
+      console.error(error);
+    }
+    this.tickEnd();
+    requestAnimationFrame(this.loop.bind(this));
+  }
+  /**
+   * Renders a scene to the canvas.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static render(): void {
+    if (this._debugVisible) {
+      this.renderDebug();
+    }
     if (this._scene && this._context) {
       this._scene.render(this._context);
     }
   }
-  private tickEnd(): void {
-    if (this._fpsmeter) {
+  /**
+   * Renders the debug information.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static renderDebug(): void {
+    for (let key in this._debugInfo) {
+      if (!this._debugContext) {
+        break;
+      }
+    }
+  }
+  /**
+   * End tick the fpsmeter component.
+   *
+   *
+   *
+   *
+   *
+   * @return void
+   */
+  private static tickEnd(): void {
+    if (this._fpsmeter && this._fpsmeterVisible) {
       this._fpsmeter.tick();
     }
   }
-  private tickStart(): void {
-    if (this._fpsmeter) {
+  /**
+   * Start tick the fpsmeter component.
+   *
+   *
+   *
+   *
+   *
+   * @return void
+   */
+  private static tickStart(): void {
+    if (this._fpsmeter && this._fpsmeterVisible) {
       this._fpsmeter.tickStart();
     }
   }
   /**
-   * Update all the components defined on the scene manager.
+   * Updates the active scene and components.
+   *
+   *
+   *
+   *
+   *
+   * @param time The value of time that has passed (in ms).
+   * @returns void
    */
-  private updateInputs(): void {
-    KeyboardInput.update();
+  private static update(time: number): void {
+    this.updateDebug(time);
+    this.updateScene(time);
+  }
+  private static updateDebug(time: number): void {
+    if (this._debugVisible && this._debugContext) {
+      this._debugMetrics = this._debugContext.measureText("AaBbCcXxYyZz");
+      this._debugInfo = {
+        fps: this._frames,
+      };
+    } else {
+      this._debugInfo = {};
+    }
   }
   /**
-   * Updates the scene.
-   * @param scene The scene to update using a fixed time step.
-   * @param time The fixed time step value.
+   * Updates the active scene.
+   *
+   *
+   *
+   *
+   *
+   * @param time The value of time that has passed (in ms).
+   * @returns void
    */
-  private updateScene(time: number): void {
+  private static updateScene(time: number): void {
     if (this._scene) {
       this._scene.update(time);
     }
   }
   /**
-   * The main loop.
-   * @param timestamp The current timestamp of the frame request.
+   * Window resize event.
+   *
+   *
+   *
+   *
+   *
+   * @param e The window event.
+   * @returns void
    */
-  protected loop(timestamp: number): void {
-    this.tickStart();
-    try {
-      let deltaTime = (timestamp - this._timestamp) / 1000;
-      this._timestamp = timestamp;
-      this._accumulatedTime += timestamp - this._timestamp;
-      console.log("deltaTime:", deltaTime, "accumulatedTime:", this._accumulatedTime, "step:", step);
-      while (this._accumulatedTime >= step) {
-        this.updateInputs();
-        this.updateScene(step);
-        this._accumulatedTime -= step;
+  private static windowResizeEvent(e: UIEvent): void {
+    if (this._canvas) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      if (this._scene) {
+        this._scene.resize(width, height);
       }
-      this.renderScene();
-      requestAnimationFrame(this.loop.bind(this));
-    } catch (error) {
-      throw error;
+      this._canvas.style.imageRendering = "pixelated";
+      // this._canvas.style.height = `${height}px`;
+      // this._canvas.style.width = `${width}px`;
+      this._canvas.height = height;
+      this._canvas.width = width;
     }
-    this.tickEnd();
   }
 }
