@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+  font-family: monospace;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+html,
+body {
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+canvas {
+  z-index: -1;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+select {
+  font-size: 100%;
+  width: 100%;
+}
