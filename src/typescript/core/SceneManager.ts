@@ -269,6 +269,7 @@ export abstract class SceneManager {
    * @returns void
    */
   private static hookWindowEvents(): void {
+    document.addEventListener("keyup", this.windowKeyUpEvent.bind(this));
     window.addEventListener("resize", this.windowResizeEvent.bind(this));
     window.dispatchEvent(
       new UIEvent("resize", { cancelable: false, bubbles: true })
@@ -432,6 +433,30 @@ export abstract class SceneManager {
   private static updateScene(time: number): void {
     if (this._scene && this._scene.running) {
       this._scene.update(time);
+    }
+  }
+  /**
+   * Document keyup event.
+   *
+   *
+   *
+   *
+   *
+   * @param e The keyboard event.
+   * @returns void
+   */
+  private static windowKeyUpEvent(e: KeyboardEvent): void {
+    if (e.code === "Space" || e.code === "KeyP") {
+      if (!this._scene) return;
+      if (this._scene.running) {
+        this._scene.pause();
+      } else {
+        this._scene.play();
+      }
+      e.preventDefault();
+    } else if (e.code === "F9") {
+      this.fpsmeterVisible = !this.fpsmeterVisible;
+      e.preventDefault();
     }
   }
   /**
