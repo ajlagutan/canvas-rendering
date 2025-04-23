@@ -116,6 +116,7 @@ export abstract class SceneManager {
         this._canvas?.width || window.innerWidth,
         this._canvas?.height || window.innerHeight
       );
+      value.initialize();
     }
     this._scene = value;
   }
@@ -155,10 +156,10 @@ export abstract class SceneManager {
    */
   public static initialize(): void {
     this.initializeGraphics();
-    this.initializeGui();
+    this.hookWindowEvents();
     this.initializeFpsmeter();
     this.initializeDebug();
-    this.hookWindowEvents();
+    this.initializeGui();
   }
   /**
    * Starts the scene update and canvas rendering.
@@ -387,6 +388,15 @@ export abstract class SceneManager {
     this.updateDebug(time);
     this.updateScene(time);
   }
+  /**
+   * Updates the debug information.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @param time The value of time that has passed (in ms).
+   */
   private static updateDebug(time: number): void {
     if (this._debugVisible && this._debugContext) {
       this._debugMetrics = this._debugContext.measureText("AaBbCcXxYyZz");
