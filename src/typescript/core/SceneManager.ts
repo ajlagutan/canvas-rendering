@@ -34,11 +34,11 @@ export abstract class SceneManager {
   private static _timeMs: number = 0;
   /**
    * Gets or sets the visibility of the fpsmeter component.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns boolean
    */
   public static get fpsmeterVisible(): boolean {
@@ -102,30 +102,23 @@ export abstract class SceneManager {
    * @param value The value to assign as an active scene.
    */
   public static set scene(value: SceneBase | null) {
-    if (value) {
-      if (this._sceneController) {
-        value.controller(this._sceneController);
-
-        this._sceneController.show();
-        this._sceneController.open();
-      }
-      value.resize(
+    this._scene = value;
+    if (this._scene) {
+      this._scene.resize(
         this._canvas?.width || window.innerWidth,
         this._canvas?.height || window.innerHeight
       );
-      value.initialize();
-    } else if (this._sceneController) {
-      this._sceneController.hide();
+      this._scene.initialize();
     }
-    this._scene = value;
+    this.updateController();
   }
   /**
    * Gets or sets the scene constructor.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns string | null
    */
   public static get sceneCtor(): string | null {
@@ -248,11 +241,11 @@ export abstract class SceneManager {
   }
   /**
    * Initializes the dat.Gui component.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns void
    */
   private static initializeGui(): void {
@@ -261,16 +254,19 @@ export abstract class SceneManager {
     this._controller = new dat.GUI({ hideable: false, width: 300 });
 
     const canvasController = this._controller.addFolder("canvas");
-    const sceneCtorController = canvasController.add(this, "sceneCtor", []).options(scenes).name("scene");
+    const sceneCtorController = canvasController
+      .add(this, "sceneCtor", [])
+      .options(scenes)
+      .name("scene");
     canvasController.open();
-    
-    const canvasSettingsController = this._controller.addFolder("canvas settings");
+
+    const canvasSettingsController =
+      this._controller.addFolder("canvas settings");
     canvasSettingsController.add(this, "frames", 30, 165, 5).name("frames/sec");
-    canvasSettingsController.add(this, "fpsmeterVisible", false).name("show fpsmeter");
+    canvasSettingsController
+      .add(this, "fpsmeterVisible", false)
+      .name("show fpsmeter");
     canvasSettingsController.open();
-    
-    this._sceneController = this._controller.addFolder("scene options");
-    this._sceneController.hide();
 
     sceneCtorController.setValue(scenes[0]);
   }
@@ -393,12 +389,35 @@ export abstract class SceneManager {
     this.updateScene(time);
   }
   /**
+   * Updates the scene controller.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static updateController(): void {
+    if (!this._controller) {
+      return;
+    }
+    if (this._sceneController) {
+      this._controller.removeFolder(this._sceneController);
+    }
+    if (!this._scene) {
+      return;
+    }
+    this._sceneController = this._controller.addFolder("scene options");
+    this._scene.controller(this._sceneController);
+    this._sceneController.open();
+  }
+  /**
    * Updates the debug information.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param time The value of time that has passed (in ms).
    */
   private static updateDebug(time: number): void {
