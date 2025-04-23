@@ -1,11 +1,11 @@
 /**
  * An abstract class that stores and manipulate data that
  * can be updated and rendered on an HTML Canvas element.
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
  * @class
  * @abstract
  */
@@ -14,11 +14,11 @@ export abstract class SceneBase {
   private _width: number;
   /**
    * Creates a new instance of a class that was derived from {@link SceneBase}.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    */
   constructor() {
     this._height = 0;
@@ -26,11 +26,11 @@ export abstract class SceneBase {
   }
   /**
    * Gets the current height of the scene.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns number
    */
   public get height(): number {
@@ -38,11 +38,11 @@ export abstract class SceneBase {
   }
   /**
    * Gets the current width of the scene.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns number
    */
   public get width(): number {
@@ -50,24 +50,22 @@ export abstract class SceneBase {
   }
   /**
    * Initializes the scene GUI controller.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param gui The dat.GUI global instance.
    * @returns dat.GUI
    */
-  public controller(gui: dat.GUI): dat.GUI | null {
-    return null;
-  }
+  public controller(gui: dat.GUI): void {}
   /**
    * Initializes the scene.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns void
    */
   public initialize(): void {
@@ -75,11 +73,11 @@ export abstract class SceneBase {
   }
   /**
    * Renders the scene on the HTML Canvas element.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param context The canvas rendering context.
    * @returns void
    */
@@ -88,11 +86,11 @@ export abstract class SceneBase {
   }
   /**
    * Resizes the scene's viewport width and height components.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param width The value to assign to the viewport's width.
    * @param height The value to assign to the viewport's height.
    * @returns void
@@ -103,11 +101,11 @@ export abstract class SceneBase {
   }
   /**
    * Updates the scene data using the fixed delta time parameter.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param time The fixed delta time per update.
    * @returns void
    */
