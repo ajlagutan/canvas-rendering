@@ -169,18 +169,6 @@ export abstract class SceneManager {
     }
   }
   /**
-   * Stops the scene update.
-   *
-   *
-   *
-   *
-   *
-   * @returns void
-   */
-  public static stop(): void {
-    this._running = false;
-  }
-  /**
    * Initializes the scene attributes component.
    *
    *
