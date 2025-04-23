@@ -103,13 +103,10 @@ export abstract class SceneManager {
    */
   public static set scene(value: SceneBase | null) {
     if (value) {
-      if (this._controller) {
-        if (this._sceneController) {
-          this._controller.removeFolder(this._sceneController);
-        }
-        this._sceneController = value.controller(this._controller);
-      }
       if (this._sceneController) {
+        value.controller(this._sceneController);
+
+        this._sceneController.show();
         this._sceneController.open();
       }
       value.resize(
@@ -117,6 +114,8 @@ export abstract class SceneManager {
         this._canvas?.height || window.innerHeight
       );
       value.initialize();
+    } else if (this._sceneController) {
+      this._sceneController.hide();
     }
     this._scene = value;
   }
@@ -260,15 +259,20 @@ export abstract class SceneManager {
     const scenes = Object.keys(Scenes);
 
     this._controller = new dat.GUI({ hideable: false, width: 300 });
-    
-    const settings = this._controller.addFolder("settings");
-    settings.add(this, "frames", 30, 165, 5).name("frames/sec");
-    settings.add(this, "fpsmeterVisible", false).name("show fpsmeter");
-    settings.open();
 
-    const scene = this._controller.addFolder("scenes");
-    scene.add(this, "sceneCtor", []).options(scenes).name("scene").setValue(scenes[0]);
-    scene.open();
+    const canvasController = this._controller.addFolder("canvas");
+    const sceneCtorController = canvasController.add(this, "sceneCtor", []).options(scenes).name("scene");
+    canvasController.open();
+    
+    const canvasSettingsController = this._controller.addFolder("canvas settings");
+    canvasSettingsController.add(this, "frames", 30, 165, 5).name("frames/sec");
+    canvasSettingsController.add(this, "fpsmeterVisible", false).name("show fpsmeter");
+    canvasSettingsController.open();
+    
+    this._sceneController = this._controller.addFolder("scene options");
+    this._sceneController.hide();
+
+    sceneCtorController.setValue(scenes[0]);
   }
   /**
    * Hooks browser window events to the scene manager.
