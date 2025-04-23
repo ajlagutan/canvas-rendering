@@ -10,20 +10,9 @@
  * @abstract
  */
 export abstract class SceneBase {
-  private _height: number;
-  private _width: number;
-  /**
-   * Creates a new instance of a class that was derived from {@link SceneBase}.
-   *
-   *
-   *
-   *
-   *
-   */
-  constructor() {
-    this._height = 0;
-    this._width = 0;
-  }
+  private _height: number = 0;
+  private _running: boolean = true;
+  private _width: number = 0;
   /**
    * Gets the current height of the scene.
    *
@@ -35,6 +24,18 @@ export abstract class SceneBase {
    */
   public get height(): number {
     return this._height;
+  }
+  /**
+   * Gets the state of the scene.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns boolean
+   */
+  public get running(): boolean {
+    return this._running;
   }
   /**
    * Gets the current width of the scene.
@@ -70,6 +71,34 @@ export abstract class SceneBase {
    */
   public initialize(): void {
     return;
+  }
+  /**
+   * Pauses the scene.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  public pause(): void {
+    if (this._running) {
+      this._running = !this._running;
+    }
+  }
+  /**
+   * Plays the scene.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  public play(): void {
+    if (!this._running) {
+      this._running = !this._running;
+    }
   }
   /**
    * Renders the scene on the HTML Canvas element.
