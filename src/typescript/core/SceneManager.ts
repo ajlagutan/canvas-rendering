@@ -441,7 +441,7 @@ export abstract class SceneManager {
    * @returns void
    */
   private static updateScene(time: number): void {
-    if (this._scene) {
+    if (this._scene && this._scene.running) {
       this._scene.update(time);
     }
   }
