@@ -253,7 +253,8 @@ export abstract class SceneManager {
     canvasSettingsController.add(this, "frames", 30, 165, 5).name("frames/sec");
     canvasSettingsController
       .add(this, "fpsmeterVisible", false)
-      .name("show fpsmeter");
+      .name("show fpsmeter")
+      .listen();
     canvasSettingsController.open();
 
     sceneCtorController.setValue(scenes[0]);
