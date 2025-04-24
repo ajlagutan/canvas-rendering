@@ -2,11 +2,11 @@ import { Vector4 } from "../core";
 import { clamp } from "../utils";
 /**
  * The different mode of color structure.
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
  * @enum
  */
 type ColorMode = "rgb" | "hsv" | "hsl";
@@ -47,11 +47,11 @@ export class Color extends Vector4 {
   }
   /**
    * A transparent color.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns Color
    */
   public static get transparent(): Color {
@@ -131,6 +131,25 @@ export class Color extends Vector4 {
     b = clamp(b, 0, 255) / 255;
     a = clamp(a, 0, 1) / 1;
     return new Color("rgb", r, g, b, a);
+  }
+  /**
+   * Clones the color values to a new Color instance.
+   *
+   * By default, it does not include the alpha component.
+   *
+   *
+   *
+   * @param includeAlpha If true, the alpha component is also cloned. (Default = false)
+   * @returns Color
+   */
+  public clone(includeAlpha: boolean = false): Color {
+    return new Color(
+      this._mode,
+      this.x,
+      this.y,
+      this.z,
+      includeAlpha ? this.w : 1
+    );
   }
   /**
    * Converts the Color object to HSL/A structure.
