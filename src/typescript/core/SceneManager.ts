@@ -270,10 +270,17 @@ export abstract class SceneManager {
    */
   private static hookWindowEvents(): void {
     document.addEventListener("keyup", this.windowKeyUpEvent.bind(this));
+
+    window.addEventListener("blur", this.windowBlurEvent.bind(this));
+    window.addEventListener("focus", this.windowFocusEvent.bind(this));
     window.addEventListener("resize", this.windowResizeEvent.bind(this));
-    window.dispatchEvent(
-      new UIEvent("resize", { cancelable: false, bubbles: true })
-    );
+
+    const resizeEvent = new UIEvent("resize", {
+      cancelable: false,
+      bubbles: true,
+    });
+
+    window.dispatchEvent(resizeEvent);
   }
   private static state: number = 0;
   /**
@@ -289,14 +296,16 @@ export abstract class SceneManager {
   private static loop(timeMs: number): void {
     this.tickStart();
     try {
-      let deltaTime = (timeMs - this._timeMs) / 1000;
-      this._timeMs = timeMs;
-      this._timeAcc += deltaTime;
-      while (this._timeAcc >= this._frameStep) {
-        this._timeAcc -= this._frameStep;
-        this.update(this._frameStep);
+      if (this._running) {
+        let deltaTime = (timeMs - this._timeMs) / 1000;
+        this._timeMs = timeMs;
+        this._timeAcc += deltaTime;
+        while (this._timeAcc >= this._frameStep) {
+          this._timeAcc -= this._frameStep;
+          this.update(this._frameStep);
+        }
+        this.render();
       }
-      this.render();
     } catch (error) {
       console.error(error);
     }
@@ -434,6 +443,30 @@ export abstract class SceneManager {
     if (this._scene && this._scene.running) {
       this._scene.update(time);
     }
+  }
+  /**
+   * Window blur event.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @param e The event.
+   */
+  private static windowBlurEvent(e: Event): void {
+    this._running = false;
+  }
+  /**
+   * Window focus event.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @param e The event.
+   */
+  private static windowFocusEvent(e: FocusEvent): void {
+    this._running = true;
   }
   /**
    * Document keyup event.
