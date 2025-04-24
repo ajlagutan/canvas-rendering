@@ -241,7 +241,7 @@ export abstract class SceneManager {
   private static initializeGui(): void {
     const scenes = Object.keys(Scenes);
 
-    this._controller = new lil.GUI({ title: "canvas" });
+    this._controller = new lil.GUI({ title: "controls" });
     this._controller.add(this, "sceneCtor", scenes).name("scene").setValue(scenes[0]);
 
     const settings = this._controller.addFolder("canvas settings");
