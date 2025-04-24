@@ -20,6 +20,7 @@ type ColorMode = "rgb" | "hsv" | "hsl";
  * @class
  */
 export class Color extends Vector4 {
+  private static _transparent: Color = Color.fromRgba(0, 0, 0, 0);
   private _mode: ColorMode = "rgb";
   /**
    * Creates a new instance of Color object.
@@ -43,6 +44,18 @@ export class Color extends Vector4 {
   ) {
     super(x, y, z, w);
     this._mode = mode;
+  }
+  /**
+   * A transparent color.
+   * 
+   * 
+   * 
+   * 
+   * 
+   * @returns Color
+   */
+  public static get transparent(): Color {
+    return this._transparent;
   }
   /**
    * Creates a Color object that represents an HSL/A structure.
