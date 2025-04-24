@@ -1,5 +1,5 @@
 import "fpsmeter";
-import * as dat from "dat.gui";
+import * as lil from "lil-gui";
 import * as Scenes from "../scenes";
 import { SceneConstructor } from "./Interfaces";
 import { SceneBase } from "./SceneBase";
@@ -26,10 +26,10 @@ export abstract class SceneManager {
   private static _fpsmeterVisible: boolean = false;
   private static _frames: number = 165;
   private static _frameStep: number = 1 / this._frames;
-  private static _controller: dat.GUI | null = null;
+  private static _controller: lil.GUI | null = null;
   private static _running: boolean = false;
   private static _scene: SceneBase | null = null;
-  private static _sceneController: dat.GUI | null = null;
+  private static _sceneController: lil.GUI | null = null;
   private static _sceneCtor: string | null = null;
   private static _timeAcc: number = 0;
   private static _timeMs: number = 0;
@@ -241,25 +241,12 @@ export abstract class SceneManager {
   private static initializeGui(): void {
     const scenes = Object.keys(Scenes);
 
-    this._controller = new dat.GUI({ hideable: false, width: 300 });
+    this._controller = new lil.GUI({ title: "canvas" });
+    this._controller.add(this, "sceneCtor", scenes).name("scene").setValue(scenes[0]);
 
-    const canvasController = this._controller.addFolder("canvas");
-    const sceneCtorController = canvasController
-      .add(this, "sceneCtor", [])
-      .options(scenes)
-      .name("scene");
-    canvasController.open();
-
-    const canvasSettingsController =
-      this._controller.addFolder("canvas settings");
-    canvasSettingsController.add(this, "frames", 30, 165, 5).name("frames/sec");
-    canvasSettingsController
-      .add(this, "fpsmeterVisible", false)
-      .name("show fpsmeter")
-      .listen();
-    canvasSettingsController.open();
-
-    sceneCtorController.setValue(scenes[0]);
+    const settings = this._controller.addFolder("canvas settings");
+    settings.add(this, "frames", 30, 165, 1).name("frames/sec");
+    settings.add(this, "fpsmeterVisible").name("show fps").listen();
   }
   /**
    * Hooks browser window events to the scene manager.
@@ -403,14 +390,14 @@ export abstract class SceneManager {
       return;
     }
     if (this._sceneController) {
-      this._controller.removeFolder(this._sceneController);
+      this._sceneController.destroy();
     }
     if (!this._scene) {
       return;
     }
     this._sceneController = this._controller.addFolder("scene options");
-    this._scene.controller(this._sceneController);
     this._sceneController.open();
+    this._scene.controller(this._sceneController);
   }
   /**
    * Updates the debug information.
@@ -448,11 +435,11 @@ export abstract class SceneManager {
   }
   /**
    * Window blur event.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param e The event.
    */
   private static windowBlurEvent(e: Event): void {
@@ -460,11 +447,11 @@ export abstract class SceneManager {
   }
   /**
    * Window focus event.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @param e The event.
    */
   private static windowFocusEvent(e: FocusEvent): void {

@@ -1,3 +1,4 @@
+import * as lil from "lil-gui";
 /**
  * An abstract class that stores and manipulate data that
  * can be updated and rendered on an HTML Canvas element.
@@ -59,7 +60,7 @@ export abstract class SceneBase {
    * @param gui The dat.GUI global instance.
    * @returns dat.GUI
    */
-  public controller(gui: dat.GUI): void {}
+  public controller(gui: lil.GUI): void {}
   /**
    * Initializes the scene.
    *
