@@ -1,4 +1,4 @@
-import dat, { GUIController } from "dat.gui";
+import * as lil from "lil-gui";
 import { SceneBase } from "../core";
 import { clamp, randomFloat } from "../utils";
 
@@ -11,7 +11,7 @@ export class TestScene extends SceneBase {
   private _vx: number = 1000;
   private _vy: number = 1000;
   private _initial: boolean = true;
-  public controller(gui: dat.GUI): void {
+  public controller(gui: lil.GUI): void {
     gui.add(this, "size", 15, 150, 5);
   }
   public render(context: CanvasRenderingContext2D): void {
