@@ -85,3 +85,98 @@ export abstract class KeyboardInput {
     return false;
   }
 }
+/**
+ * Mouse class handles and manages the browser's window mouse inputs.
+ *
+ *
+ *
+ *
+ *
+ * @abstract
+ * @class
+ */
+export abstract class Mouse {
+  private static _x: number | undefined = undefined;
+  private static _y: number | undefined = undefined;
+  /**
+   * Gets the mouse x coordinate.
+   *
+   *
+   *
+   *
+   *
+   * @returns number | undefined
+   */
+  public static get x(): number | undefined {
+    return this._x;
+  }
+  /**
+   * Gets the mouse y coordinate.
+   *
+   *
+   *
+   *
+   *
+   * @returns number | undefined
+   */
+  public static get y(): number | undefined {
+    return this._y;
+  }
+  /**
+   * Initializes the Mouse class.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  public static initialize(): void {
+    this.hookWindowEvents();
+  }
+  /**
+   * Hooks browser window events to the mouse class.
+   *
+   *
+   *
+   *
+   *
+   * @returns void
+   */
+  private static hookWindowEvents(): void {
+    document.addEventListener(
+      "mousemove",
+      this.windowMouseMoveEvent.bind(this)
+    );
+    document.addEventListener(
+      "mouseleave",
+      this.windowMouseLeaveEvent.bind(this)
+    );
+  }
+  /**
+   * Window mouse leave event.
+   *
+   *
+   *
+   *
+   *
+   * @param e The mouse event.
+   */
+  private static windowMouseLeaveEvent(e: MouseEvent): void {
+    this._x = undefined;
+    this._y = undefined;
+  }
+  /**
+   * Window mouse move event.
+   *
+   *
+   *
+   *
+   *
+   * @param e The mouse event.
+   */
+  private static windowMouseMoveEvent(e: MouseEvent): void {
+    this._x = e.x;
+    this._y = e.y;
+  }
+}

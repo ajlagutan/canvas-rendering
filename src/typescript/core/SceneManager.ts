@@ -3,6 +3,7 @@ import * as dat from "dat.gui";
 import * as Scenes from "../scenes";
 import { SceneConstructor } from "./Interfaces";
 import { SceneBase } from "./SceneBase";
+import { Mouse } from "./Inputs";
 /**
  * A static class that manages the scenes.
  *
@@ -147,6 +148,7 @@ export abstract class SceneManager {
    * @returns void
    */
   public static initialize(): void {
+    Mouse.initialize();
     this.initializeGraphics();
     this.hookWindowEvents();
     this.initializeFpsmeter();
