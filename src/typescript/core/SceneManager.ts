@@ -4,6 +4,15 @@ import * as Scenes from "../scenes";
 import { SceneConstructor } from "./Interfaces";
 import { SceneBase } from "./SceneBase";
 import { Mouse } from "./Inputs";
+import { SceneRecorder } from "./SceneRecorder";
+/**
+ *
+ *
+ *
+ *
+ *
+ */
+type SceneManagerState = "playing" | "paused";
 /**
  * A static class that manages the scenes.
  *
@@ -31,6 +40,7 @@ export abstract class SceneManager {
   private static _scene: SceneBase | null = null;
   private static _sceneController: lil.GUI | null = null;
   private static _sceneCtor: string | null = null;
+  private static _sceneStateOnBlur: SceneManagerState | null = null;
   private static _timeAcc: number = 0;
   private static _timeMs: number = 0;
   /**
@@ -242,9 +252,13 @@ export abstract class SceneManager {
     const scenes = Object.keys(Scenes);
 
     this._controller = new lil.GUI({ title: "controls" });
-    this._controller.add(this, "sceneCtor", scenes).name("scene").setValue(scenes[0]);
+    this._controller
+      .add(this, "sceneCtor", scenes)
+      .name("scene")
+      .setValue(scenes[0]);
 
     const settings = this._controller.addFolder("canvas settings");
+
     settings.add(this, "frames", 30, 165, 1).name("frames/sec");
     settings.add(this, "fpsmeterVisible").name("show fps").listen();
   }
@@ -443,7 +457,15 @@ export abstract class SceneManager {
    * @param e The event.
    */
   private static windowBlurEvent(e: Event): void {
-    this._running = false;
+    if (!this._scene) return;
+    if (!this._scene.running) {
+      this._sceneStateOnBlur = "paused";
+      return;
+    }
+    if (!SceneRecorder.recording) {
+      this._sceneStateOnBlur = "playing";
+      this._scene.pause();
+    }
   }
   /**
    * Window focus event.
@@ -455,7 +477,14 @@ export abstract class SceneManager {
    * @param e The event.
    */
   private static windowFocusEvent(e: FocusEvent): void {
-    this._running = true;
+    if (!this._scene) return;
+    if (!this._sceneStateOnBlur) return;
+    if (this._sceneStateOnBlur === "paused") {
+      this._sceneStateOnBlur = null;
+      return;
+    }
+    this._scene.play();
+    this._sceneStateOnBlur = null;
   }
   /**
    * Document keyup event.
@@ -476,8 +505,16 @@ export abstract class SceneManager {
         this._scene.play();
       }
       e.preventDefault();
-    } else if (e.code === "F9") {
+    } else if (e.code === "KeyF") {
       this.fpsmeterVisible = !this.fpsmeterVisible;
+      e.preventDefault();
+    } else if (e.code === "KeyR") {
+      if (!this._canvas) return;
+      if (!SceneRecorder.recording) {
+        SceneRecorder.record(this._canvas);
+      } else {
+        SceneRecorder.stop();
+      }
       e.preventDefault();
     }
   }
