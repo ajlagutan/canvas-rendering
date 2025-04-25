@@ -29,8 +29,12 @@ type ParticleUpdateType = "count" | "palette" | "velocity" | "alpha";
  */
 export class ParticleScene2 extends SceneBase {
   private _loading: boolean = false;
-  private _mouseX: number = this.width / 2;
-  private _mouseY: number = this.height / 2;
+  private _mousedx: number = 0;
+  private _mousedy: number = 0;
+  private _mousepx: number = 0;
+  private _mousepy: number = 0;
+  private _mousex: number = 0;
+  private _mousey: number = 0;
   private _paletteController: lil.Controller | null = null;
   private _palette: Array<Color> = [];
   private _palettes: any = {};
@@ -76,6 +80,9 @@ export class ParticleScene2 extends SceneBase {
 
     mouse.add(ParticleSceneOptions, "mouseFollow").name("follow");
     mouse
+      .add(ParticleSceneOptions, "mouseVelocity", 0.5, 10.0, 0.1)
+      .name("max. velocity");
+    mouse
       .add(ParticleSceneOptions, "mouseRadius", 50, 200, 1)
       .name("max. radius");
   }
@@ -107,18 +114,22 @@ export class ParticleScene2 extends SceneBase {
 
   public update(time: number): void {
     if (ParticleSceneOptions.mouseFollow) {
-      this._mouseX = Mouse.x || this.width / 2;
-      this._mouseY = Mouse.y || this.height / 2;
+      this._mousex = Mouse.x || this.width / 2;
+      this._mousey = Mouse.y || this.height / 2;
     } else {
-      this._mouseX = this.width / 2;
-      this._mouseY = this.height / 2;
+      this._mousex = this.width / 2;
+      this._mousey = this.height / 2;
     }
+    this._mousedx = this._mousex - this._mousepx;
+    this._mousedy = this._mousey - this._mousepy;
+    this._mousepx += this._mousedx * ParticleSceneOptions.mouseVelocity * time;
+    this._mousepy += this._mousedy * ParticleSceneOptions.mouseVelocity * time;
     if (!this._updatingParticlesArray && this._loading) {
       return;
     }
     for (let p of this._particles) {
-      if (this._mouseX !== undefined && this._mouseY !== undefined) {
-        let totalDistance = distance(p.x, p.y, this._mouseX, this._mouseY);
+      if (this._mousex !== undefined && this._mousey !== undefined) {
+        let totalDistance = distance(p.x, p.y, this._mousepx, this._mousepy);
         let totalRadius = p.radius + ParticleSceneOptions.mouseRadius;
         if (totalDistance - totalRadius < 0) {
           p.radius++;
@@ -252,6 +263,7 @@ abstract class ParticleSceneOptions {
   private static _count: number = 10000;
   private static _mouseFollow: boolean = false;
   private static _mouseRadius: number = 200;
+  private static _mouseVelocity: number = 10;
   private static _palette: string | null = null;
   private static _particleRadius: number = 100;
   private static _velocity: number = 1000;
@@ -362,6 +374,24 @@ abstract class ParticleSceneOptions {
    */
   public static set mouseRadius(value: number) {
     this._mouseRadius = value;
+  }
+  /**
+   * Gets or sets the mouse follow velocity.
+   *
+   *
+   *
+   *
+   *
+   * @returns number
+   */
+  public static get mouseVelocity(): number {
+    return this._mouseVelocity;
+  }
+  /**
+   * @param value The mouse follow velocity.
+   */
+  public static set mouseVelocity(value: number) {
+    this._mouseVelocity = value;
   }
   /**
    * Gets or sets the color palette to use.
