@@ -133,6 +133,22 @@ export class Color extends Vector4 {
     return new Color("rgb", r, g, b, a);
   }
   /**
+   * Compares two color objects.
+   *
+   * The Alpha component is not compared.
+   *
+   *
+   *
+   * @param color1 The first color to compare.
+   * @param color2 The second color to compare.
+   */
+  public static is(color1: Color, color2: Color): boolean {
+    if (color1._mode !== color2._mode) return false;
+    return (
+      color1.x === color2.x && color1.y === color2.y && color1.z === color2.z
+    );
+  }
+  /**
    * Clones the color values to a new Color instance.
    *
    * By default, it does not include the alpha component.
@@ -150,6 +166,19 @@ export class Color extends Vector4 {
       this.z,
       includeAlpha ? this.w : 1
     );
+  }
+  /**
+   * Compares the color object to another color object.
+   *
+   * The Alpha component is not compared.
+   *
+   *
+   *
+   * @param other The other color to compare with.
+   * @returns boolean
+   */
+  public is(other: Color): boolean {
+    return Color.is(this, other);
   }
   /**
    * Converts the Color object to HSL/A structure.
