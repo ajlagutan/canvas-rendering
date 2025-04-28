@@ -1,3 +1,4 @@
+import * as lil from "lil-gui";
 import { SceneBase } from "../core";
 import { Color, Particle } from "../objects";
 import {
@@ -85,8 +86,8 @@ export class ParticleScene1 extends SceneBase {
     });
   }
 
-  public controller(gui: dat.GUI): void {
-    gui.add(this, "collisions", true).name("enable collisions");
+  public controller(gui: lil.GUI): void {
+    gui.add(this, "collisions").name("enable collisions");
     gui.add(this, "count", 1, 1000, 1);
     gui.add(this, "radius", 10, 100, 1);
   }
