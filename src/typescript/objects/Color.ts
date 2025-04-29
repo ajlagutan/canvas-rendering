@@ -1,4 +1,4 @@
-import { Vector4 } from "../core";
+import { Vector3, Vector4 } from "../core";
 import { clamp } from "../utils";
 /**
  * The different mode of color structure.
@@ -49,11 +49,11 @@ export class Color extends Vector4 {
   }
   /**
    * A black color in RGB space.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns Color
    */
   public static get black(): Color {
@@ -73,11 +73,11 @@ export class Color extends Vector4 {
   }
   /**
    * A white color in RGB space.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns Color
    */
   public static get white(): Color {
@@ -157,6 +157,44 @@ export class Color extends Vector4 {
     b = clamp(b, 0, 255) / 255;
     a = clamp(a, 0, 1) / 1;
     return new Color("rgb", r, g, b, a);
+  }
+  /**
+   * Creates a Color object from a Vector3 object.
+   *
+   * The Vector3 object has no W component, therefore the Alpha component is set to 1.
+   *
+   *
+   *
+   * @param vector The Vector3 object to get the values from.
+   * @returns Color
+   */
+  public static fromVector3(vector: Vector3): Color {
+    if (vector.x < 256) {
+      return Color.fromRgba(vector.x, vector.y, vector.z, 1);
+    }
+    if (vector.x < 360) {
+      return Color.fromHsla(vector.x, vector.y, vector.z, 1);
+    }
+    throw new Error("Invalid Vector3 object passed as an argument.");
+  }
+  /**
+   * Creates a Color object from a Vector4 object.
+   *
+   *
+   *
+   *
+   *
+   * @param vector The Vector4 object to get the values from.
+   * @returns Color
+   */
+  public static fromVector4(vector: Vector4): Color {
+    if (vector.x < 256) {
+      return Color.fromRgba(vector.x, vector.y, vector.z, vector.w);
+    }
+    if (vector.x < 360) {
+      return Color.fromHsla(vector.x, vector.y, vector.z, vector.w);
+    }
+    throw new Error("Invalid Vector4 object passed as an argument.");
   }
   /**
    * Compares two color objects.
@@ -247,7 +285,7 @@ export class Color extends Vector4 {
 
     return Color.fromHsla(h, s, l, this.w);
   }
-  public toString(): string {
+  public toString(html: boolean = false): string {
     let o = { x: 0, y: 0, z: 0, w: 0 };
     let s = "transparent";
     if (this._mode === "rgb") {
@@ -255,9 +293,20 @@ export class Color extends Vector4 {
       o.y = clamp(this.y * 255, 0, 255);
       o.z = clamp(this.z * 255, 0, 255);
       o.w = clamp(this.w * 1, 0, 1);
+      if (html) {
+        o.w = clamp(o.w * 255, 0, 255);
+        let x16 = o.x.toString(16).padStart(2, "0");
+        let y16 = o.y.toString(16).padStart(2, "0");
+        let z16 = o.z.toString(16).padStart(2, "0");
+        let w16 = o.w.toString(16).padStart(2, "0");
+        return o.w === 255 ? `#${x16}${y16}${z16}` : `#${x16}${y16}${z16}${w16}`;
+      }
       s = o.w === 1 ? "rgb(/x/,/y/,/z/)" : "rgba(/x/,/y/,/z/,/w/)";
     }
     if (this._mode === "hsl") {
+      if (html) {
+        throw new Error("Color space HSL cannot be converted to HTML string.");
+      }
       o.x = clamp(this.x * 360, 0, 360);
       o.y = clamp(this.y * 100, 0, 100);
       o.z = clamp(this.z * 100, 0, 100);
@@ -265,6 +314,9 @@ export class Color extends Vector4 {
       s = o.w === 1 ? "hsl(/x/,/y/%,/z/%)" : "hsla(/x/,/y/%,/z/%,/w/)";
     }
     if (this._mode === "hsv") {
+      if (html) {
+        throw new Error("Color space HSV cannot be converted to HTML string.");
+      }
       o.x = clamp(this.x * 360, 0, 360);
       o.y = clamp(this.y * 100, 0, 100);
       o.z = clamp(this.z * 100, 0, 100);
