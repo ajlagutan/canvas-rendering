@@ -1,6 +1,19 @@
 import { Vector2 } from "../core";
 import { Color } from "./Color";
 /**
+ * A callback function for rendering a particle.
+ * 
+ * 
+ * 
+ * 
+ * 
+ * @callback
+ * @returns void
+ */
+export interface ParticleRenderCallback<T extends Particle> {
+  (context: CanvasRenderingContext2D, particle: T): void;
+}
+/**
  * A particle class.
  *
  *
@@ -136,11 +149,11 @@ export class PolygonalParticle extends Particle {
   }
   /**
    * Gets or sets the number of sides of the polygon.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
+   *
+   *
    * @returns number
    */
   public get sides(): number {
