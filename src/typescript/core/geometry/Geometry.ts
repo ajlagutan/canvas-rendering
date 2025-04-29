@@ -2,6 +2,7 @@
  * Stores the location and size of a rectangular region.
  */
 export class Rectangle {
+  private static _empty: Rectangle = new Rectangle(0, 0, 0, 0);
   /** Gets or sets the width of the rectangular region defined by this rectangle. */
   public height: number;
   /** Gets or sets the width of the rectangular region defined by this rectangle. */
@@ -28,6 +29,9 @@ export class Rectangle {
     this.width = width;
     this.height = height;
   }
+  public static get empty(): Rectangle {
+    return this._empty;
+  }
   /**
    * Gets the y-coordinate of the lower-right corner of the rectangular region defined by this rectangle.
    */
@@ -52,6 +56,10 @@ export class Rectangle {
   public get top(): number {
     return this.y;
   }
+  /**
+   * Clone the rectangle x, y, width, and height components to a new instance.
+   * @returns Rectangle
+   */
   public clone(): Rectangle {
     return new Rectangle(this.x, this.y, this.width, this.height);
   }
