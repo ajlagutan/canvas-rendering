@@ -1,6 +1,7 @@
 export * from "./core/geometry/Geometry";
 export * from "./core/geometry/Vectors";
 
+export * from "./core/Assets";
 export * from "./core/Inputs";
 export * from "./core/Interfaces";
 export * from "./core/SceneBase";
