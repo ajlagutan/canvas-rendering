@@ -133,6 +133,33 @@ export class Color extends Vector4 {
     a = clamp(a, 0, 1) / 1;
     return new Color("hsv", h, s, v, a);
   }
+  public static fromHtmlString(s: string): Color {
+    s = s.startsWith("#") ? s.substring(1) : s;
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    let w = 0;
+    if (s.length === 3) {
+      x = parseInt(s.substring(0, 1).repeat(2), 16);
+      y = parseInt(s.substring(1, 2).repeat(2), 16);
+      z = parseInt(s.substring(2, 3).repeat(2), 16);
+      return Color.fromRgba(x, y, z, 1);
+    }
+    if (6 > s.length && s.length > 3) {
+      x = parseInt(s.substring(0, 1).repeat(2), 16);
+      y = parseInt(s.substring(1, 2).repeat(2), 16);
+      z = parseInt(s.substring(2, 3).repeat(2), 16);
+      w = parseInt(s.substring(3, 4).repeat(2), 16) / 255;
+      return Color.fromRgba(x, y, z, w);
+    }
+    if (s.length === 6) {
+      x = parseInt(s.substring(0, 2), 16);
+      y = parseInt(s.substring(2, 4), 16);
+      z = parseInt(s.substring(4, 6), 16);
+      return Color.fromRgba(x, y, z, 1);
+    }
+    return Color.transparent;
+  }
   /**
    * Creates a Color object that represents an RGB/A structure.
    *
@@ -299,7 +326,9 @@ export class Color extends Vector4 {
         let y16 = o.y.toString(16).padStart(2, "0");
         let z16 = o.z.toString(16).padStart(2, "0");
         let w16 = o.w.toString(16).padStart(2, "0");
-        return o.w === 255 ? `#${x16}${y16}${z16}` : `#${x16}${y16}${z16}${w16}`;
+        return o.w === 255
+          ? `#${x16}${y16}${z16}`
+          : `#${x16}${y16}${z16}${w16}`;
       }
       s = o.w === 1 ? "rgb(/x/,/y/,/z/)" : "rgba(/x/,/y/,/z/,/w/)";
     }
