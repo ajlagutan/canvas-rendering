@@ -29,6 +29,10 @@ export class Rectangle {
     this.width = width;
     this.height = height;
   }
+  /**
+   * An empty rectangle.
+   * @returns Rectangle
+   */
   public static get empty(): Rectangle {
     return this._empty;
   }
