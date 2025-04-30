@@ -11,7 +11,7 @@ import { Color } from "./Color";
  * @returns void
  */
 export interface ParticleRenderCallback<T extends Particle> {
-  (context: CanvasRenderingContext2D, particle: T): void;
+  (context: CanvasRenderingContext2D, particle: T, index: number): void;
 }
 /**
  * A particle class.

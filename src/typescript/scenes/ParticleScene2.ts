@@ -83,10 +83,16 @@ export class ParticleScene2 extends SceneBase {
     const particleCount = new Vector3(1000, 10000, 1);
     const particleSide = new Vector3(2, 12, 1);
     const particleRadius = new Vector3(10, 200, 1);
+    const particleRadiusFactor = new Vector3(10, 100, 1);
     const particleVelocity = new Vector3(200, 1000, 1);
 
     particles
-      .add(Options.Particles, "mode", ["fill", "stroke", "fill & stroke"])
+      .add(Options.Particles, "mode", [
+        "fill",
+        "stroke",
+        "fill+stroke",
+        "fill/stroke",
+      ])
       .onChange(this.updateParticleMode.bind(this));
 
     particles
@@ -112,24 +118,53 @@ export class ParticleScene2 extends SceneBase {
     particles
       .add(
         Options.Particles,
-        "maxRadius",
-        particleRadius.x,
-        particleRadius.y,
-        particleRadius.z
-      )
-      .name("max. radius")
-      .onChange(this.updateParticles.bind(this, "particleRadius"));
-
-    particles
-      .add(
-        Options.Particles,
         "maxVelocity",
         particleVelocity.x,
         particleVelocity.y,
         particleVelocity.z
       )
-      .name("max. velocity")
-      .onChange(this.updateParticles.bind(this, "particleVelocity"));
+      .onChange(this.updateParticles.bind(this, "particleVelocity"))
+      .name("max. velocity");
+
+    const radius = particles.addFolder("radius");
+
+    radius
+      .add(
+        Options.Particles,
+        "maxRadius",
+        particleRadius.x,
+        particleRadius.y,
+        particleRadius.z
+      )
+      .onChange(this.updateParticles.bind(this, "particleRadius"))
+      .name("max")
+      .listen();
+
+    radius
+      .add(
+        Options.Particles,
+        "radiusGain",
+        particleRadiusFactor.x,
+        particleRadiusFactor.y,
+        particleRadiusFactor.z
+      )
+      .onChange(this.updateParticles.bind(this, "particleRadius"))
+      .name("gain")
+      .listen();
+
+    radius
+      .add(
+        Options.Particles,
+        "radiusDecay",
+        particleRadiusFactor.x,
+        particleRadiusFactor.y,
+        particleRadiusFactor.z
+      )
+      .onChange(this.updateParticles.bind(this, "particleRadius"))
+      .name("decay")
+      .listen();
+
+    particles.add(Options.Particles, "resetRadius").name("reset radius");
 
     const mouse = gui.addFolder("mouse");
     const mouseRadius = new Vector3(50, 200, 1);
@@ -170,8 +205,9 @@ export class ParticleScene2 extends SceneBase {
     context.fillRect(0, 0, this.width, this.height);
     context.restore();
     for (let p of this._particles) {
-      this._particleFill(context, p);
-      this._particleStroke(context, p);
+      const i = this._particles.indexOf(p);
+      this._particleFill(context, p, i);
+      this._particleStroke(context, p, i);
     }
   }
 
@@ -227,16 +263,24 @@ export class ParticleScene2 extends SceneBase {
 
   private particleFill(
     context: CanvasRenderingContext2D,
-    particle: PolygonalParticle
+    particle: PolygonalParticle,
+    index: number
   ): void {
+    if (Options.Particles.mode.indexOf("/") > 0 && index % 2 !== 0) {
+      return;
+    }
     context.fillStyle = particle.color.toString();
     context.fill(particle.path);
   }
 
   private particleStroke(
     context: CanvasRenderingContext2D,
-    particle: PolygonalParticle
+    particle: PolygonalParticle,
+    index: number
   ): void {
+    if (Options.Particles.mode.indexOf("/") > 0 && index % 2 === 0) {
+      return;
+    }
     context.lineJoin = "round";
     context.lineWidth = 3;
     context.strokeStyle = particle.color.clone().toString();
@@ -336,9 +380,9 @@ export class ParticleScene2 extends SceneBase {
     let totalDistance = distance(p.x, p.y, this._mouse.x, this._mouse.y);
     let totalRadius = p.radius + Options.Mouse.radius;
     if (totalDistance - totalRadius < 0) {
-      p.radius++;
+      p.radius += Options.Particles.radiusGain * time;
     } else {
-      p.radius--;
+      p.radius -= Options.Particles.radiusDecay * time;
     }
     p.radius = clamp(p.radius, 0, Options.Particles.maxRadius);
   }
@@ -479,11 +523,33 @@ namespace Options {
      */
     public static mode: string = "fill";
     /**
+     * Gets or sets the decay of the particle radius.
+     *
+     * @returns number
+     */
+    public static radiusDecay: number = 50;
+    /**
+     * Gets or sets the gain of the particle radius.
+     *
+     * @returns number
+     */
+    public static radiusGain: number = 50;
+    /**
      * Gets or sets the number of sides of a polygon.
      *
      * @returns number
      */
     public static sides: number = 6;
+    /**
+     * Resets the radius options.
+     *
+     * @returns void
+     */
+    public static resetRadius(): void {
+      Options.Particles.maxRadius = 50;
+      Options.Particles.radiusGain = 50;
+      Options.Particles.radiusDecay = 50;
+    }
   }
   /**
    * Global options for the scene.

@@ -97,8 +97,9 @@ export class ParticleScene1 extends SceneBase {
     for (let p of this._particles) {
       for (let q of this._particles) {
         if (p === q) continue;
-        let totalDistance =
-          distance(p.x, p.y, q.x, q.y) - (p.radius + q.radius);
+        let dist = distance(p.x, p.y, q.x, q.y);
+        let radius = p.radius + q.radius;
+        let totalDistance = dist - radius;
         let totalAlpha = 1 - totalDistance / Options.Particles.maxDistance;
         let color = Color.fromHtmlString(Options.Scene.foreground);
         color.w = clamp(totalAlpha, 0, 1);
