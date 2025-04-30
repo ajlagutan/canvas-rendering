@@ -12,12 +12,43 @@ import * as lil from "lil-gui";
  */
 export abstract class SceneBase {
   private _height: number = 0;
-  private _running: boolean = true;
+  private _running: boolean = false;
   private _width: number = 0;
   /**
+   * Gets the display author of the scene.
+   * 
+   * 
+   * 
+   * @returns string | null
+   * @default null
+   */
+  public get displayAuthor(): string | null {
+    return null;
+  }
+  /**
+   * Gets the display description of the scene.
+   * 
+   * 
+   * 
+   * @returns string | null
+   * @default null
+   */
+  public get displayDescription(): string | null {
+    return null;
+  }
+  /**
+   * Gets the display title of the scene.
+   * 
+   * 
+   * 
+   * @returns string | null
+   * @default null
+   */
+  public get displayTitle(): string | null {
+    return null;
+  }
+  /**
    * Gets the current height of the scene.
-   *
-   *
    *
    *
    *
@@ -28,11 +59,9 @@ export abstract class SceneBase {
   }
   /**
    * Gets the state of the scene.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @returns boolean
    */
   public get running(): boolean {
@@ -40,8 +69,6 @@ export abstract class SceneBase {
   }
   /**
    * Gets the current width of the scene.
-   *
-   *
    *
    *
    *
@@ -55,31 +82,25 @@ export abstract class SceneBase {
    *
    *
    *
-   *
-   *
-   * @param gui The dat.GUI global instance.
-   * @returns dat.GUI
+   * @param parent The lil.GUI global instance.
+   * @returns lil.GUI
    */
-  public controller(gui: lil.GUI): void {}
+  public controller(parent: lil.GUI): void {
+    parent.hide();
+  }
   /**
    * Initializes the scene.
    *
    *
    *
-   *
-   *
    * @returns void
    */
-  public initialize(): void {
-    return;
-  }
+  public initialize(): void {}
   /**
    * Pauses the scene.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @returns void
    */
   public pause(): void {
@@ -89,11 +110,9 @@ export abstract class SceneBase {
   }
   /**
    * Plays the scene.
-   * 
-   * 
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @returns void
    */
   public play(): void {
@@ -106,18 +125,12 @@ export abstract class SceneBase {
    *
    *
    *
-   *
-   *
    * @param context The canvas rendering context.
    * @returns void
    */
-  public render(context: CanvasRenderingContext2D): void {
-    return;
-  }
+  public render(context: CanvasRenderingContext2D): void {}
   /**
    * Resizes the scene's viewport width and height components.
-   *
-   *
    *
    *
    *
@@ -134,12 +147,8 @@ export abstract class SceneBase {
    *
    *
    *
-   *
-   *
    * @param time The fixed delta time per update.
    * @returns void
    */
-  public update(time: number): void {
-    return;
-  }
+  public update(time: number): void {}
 }
