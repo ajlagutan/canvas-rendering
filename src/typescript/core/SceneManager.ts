@@ -6,6 +6,12 @@ import { SceneBase } from "./SceneBase";
 import { Mouse } from "./Inputs";
 import { SceneRecorder } from "./SceneRecorder";
 /**
+ * Global cache.
+ * 
+ * @returns Map<string, SceneBase>
+ */
+var cache: Map<string, SceneBase> = new Map();
+/**
  *
  *
  *
@@ -114,13 +120,6 @@ export abstract class SceneManager {
    */
   public static set scene(value: SceneBase | null) {
     this._scene = value;
-    if (this._scene) {
-      this._scene.resize(
-        this._canvas?.width || window.innerWidth,
-        this._canvas?.height || window.innerHeight
-      );
-      this._scene.initialize();
-    }
     this.updateController();
   }
   /**
@@ -139,14 +138,30 @@ export abstract class SceneManager {
    * @param value The name of the scene constructor.
    */
   public static set sceneCtor(value: string | null) {
+    this._scene = null;
     this._sceneCtor = value;
-    if (this._sceneCtor && this._sceneCtor !== "") {
-      const c: SceneConstructor = Object.assign(Scenes)[this._sceneCtor];
-      const s: SceneBase = new c();
-      this.scene = s;
-    } else {
-      this.scene = null;
+
+    if (!this._sceneCtor || this._sceneCtor === "") {
+      return;
     }
+
+    let scene = cache.get(this._sceneCtor);
+    if (scene) {
+      this.scene = scene;
+      return;
+    }
+
+    const sceneCtor: SceneConstructor = Object.assign(Scenes)[this._sceneCtor];
+
+    scene = new sceneCtor();
+    scene.resize(
+      this._canvas?.width || window.innerWidth,
+      this._canvas?.height || window.innerHeight
+    );
+    scene.initialize();
+    cache.set(this._sceneCtor, scene);
+    
+    this.scene = scene;
   }
   /**
    * Initializes the manager class.
@@ -250,17 +265,13 @@ export abstract class SceneManager {
    */
   private static initializeGui(): void {
     const scenes = Object.keys(Scenes);
-
     this._controller = new lil.GUI({ title: "controls" });
+    this._controller.add(this, "fpsmeterVisible").name("show fps").listen();
+    this._controller.add(this, "frames", 30, 165, 1).name("frames/sec");
     this._controller
       .add(this, "sceneCtor", scenes)
       .name("scene")
       .setValue(scenes[0]);
-
-    const settings = this._controller.addFolder("canvas settings");
-
-    settings.add(this, "frames", 30, 165, 1).name("frames/sec");
-    settings.add(this, "fpsmeterVisible").name("show fps").listen();
   }
   /**
    * Hooks browser window events to the scene manager.
