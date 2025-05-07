@@ -23,9 +23,22 @@ import {
   randomInt,
   randomNonZero,
 } from "../utils";
-/**
- *
- */
+
+function getFileName(path: string | URL): string {
+  const location = path instanceof URL ? path.pathname : path;
+
+  let start = location.lastIndexOf("/");
+  let length = location.lastIndexOf(".");
+  if (start === -1) {
+    return location;
+  }
+  start++;
+
+  return length === -1
+    ? location.substring(start)
+    : location.substring(start, length);
+}
+
 export class ParticleScene2 extends SceneBase {
   private static DefaultParticleRender: ParticleRenderCallback<PolygonalParticle> =
     () => {};
@@ -252,7 +265,7 @@ export class ParticleScene2 extends SceneBase {
           palette[p.name] = p.colors;
         }
         let path = new URL(k);
-        let name = path.pathname.replace("/assets/", "").replace(".json", ""); 
+        let name = getFileName(path);
         initial = initial || palette;
         this._palette[name] = palette;
       }
