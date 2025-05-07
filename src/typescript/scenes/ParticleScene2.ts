@@ -1,4 +1,5 @@
 import * as lil from "lil-gui";
+import urlJoin from "url-join";
 import { ParticleSceneUpdateMode } from "./_common";
 import {
   Assets,
@@ -190,9 +191,9 @@ export class ParticleScene2 extends SceneBase {
   public initialize(): void {
     if (!this._assets) {
       this._assets = Assets.create(
-        "./assets/palette.json",
-        "./assets/palette.ladygaga.json",
-        "./assets/palette.taylorswift.json"
+        urlJoin(location.href, "assets/palette.json"),
+        urlJoin(location.href, "assets/palette.ladygaga.json"),
+        urlJoin(location.href, "assets/palette.taylorswift.json")
       );
     }
     this._mouse.x = this.width / 2;
@@ -250,9 +251,10 @@ export class ParticleScene2 extends SceneBase {
         for (let p of JSON.parse(json)) {
           palette[p.name] = p.colors;
         }
-        k = k.replace("./assets/", "").replace(".json", "");
+        let path = new URL(k);
+        let name = path.pathname.replace("/assets/", "").replace(".json", ""); 
         initial = initial || palette;
-        this._palette[k] = palette;
+        this._palette[name] = palette;
       }
       if (this._paletteSourceController) {
         this._paletteSourceController.options(this._palette).setValue(initial);
