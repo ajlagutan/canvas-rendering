@@ -3,18 +3,13 @@ import * as lil from "lil-gui";
 import * as Scenes from "../scenes";
 import { SceneConstructor } from "./Interfaces";
 import { SceneBase } from "./SceneBase";
-import { Mouse } from "./Inputs";
 import { SceneRecorder } from "./SceneRecorder";
-import { Rectangle } from "../core";
+import { Keyboard, Mouse, Rectangle } from "../core";
 /**
  *
  */
 type SceneManagerInitProps = { autoStart?: boolean };
 /**
- *
- *
- *
- *
  *
  */
 type SceneManagerState = "playing" | "paused";
@@ -34,6 +29,7 @@ export abstract class SceneManager {
   private static _canvas: HTMLCanvasElement | null = null;
   private static _context: CanvasRenderingContext2D | null = null;
   private static _controlPanel: lil.GUI | null = null;
+  private static _controlPanelVisible: boolean = true;
   private static _fixedStep: number = 1 / 165;
   private static _fpsmeter: FPSMeter | null = null;
   private static _fpsmeterBox: HTMLElement | null = null;
@@ -83,9 +79,10 @@ export abstract class SceneManager {
    */
   public static initialize(props?: SceneManagerInitProps): void {
     this.initializeCanvas();
-    this.hookWindowEvents();
+    this.setupEventHandlers();
     this.initializeFpsmeter();
     this.initializeControlPanel();
+    this.initializeInput();
   }
   /**
    * Starts the scene updates and rendering.
@@ -157,18 +154,6 @@ export abstract class SceneManager {
     }
   }
   /**
-   * Hooks window events.
-   *
-   *
-   *
-   * @returns void
-   */
-  private static hookWindowEvents(): void {
-    window.addEventListener("blur", this.windowBlurEvent.bind(this));
-    window.addEventListener("focus", this.windowFocusEvent.bind(this));
-    window.addEventListener("resize", this.windowResizeEvent.bind(this));
-  }
-  /**
    * Initializes the canvas components.
    *
    *
@@ -209,7 +194,8 @@ export abstract class SceneManager {
       this._controlPanel
         .add(Options.Frame, "visible")
         .onFinishChange(this.toggleFpsmeter.bind(this))
-        .name("show fpsmeter");
+        .name("show fpsmeter")
+        .listen();
       this._controlPanel
         .add(Options.Frame, "fps", 30, 250, 1)
         .onFinishChange(this.setFixedStep.bind(this))
@@ -271,6 +257,17 @@ export abstract class SceneManager {
     this.toggleFpsmeter(Options.Frame.visible);
   }
   /**
+   * Initializes the inputs.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static initializeInput(): void {
+    Keyboard.initialize();
+    Mouse.initialize();
+  }
+  /**
    * The main loop.
    *
    *
@@ -282,20 +279,56 @@ export abstract class SceneManager {
     try {
       if (this._running) {
         this.tickStart();
-        let deltaTime = (time - this._time) / 1000;
-        this._time = time;
-        this._timeAcc += deltaTime;
-        while (this._timeAcc >= this._fixedStep) {
-          this._timeAcc -= this._fixedStep;
-          this.update(this._fixedStep);
-        }
-        this.render();
+        this.updateInput(time);
+        this.update(time);
         this.tickEnd();
       }
       requestAnimationFrame(this.mainLoop.bind(this));
     } catch (error) {
       console.error(error);
     }
+  }
+  /**
+   * The window focus event.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static onFocus(event: Event): void {
+    if (!this._scene) return;
+    if (!this._sceneStateOnBlur || this._sceneStateOnBlur === "paused") {
+      this._sceneStateOnBlur = null;
+      return;
+    }
+    this._scene.play();
+    this._sceneStateOnBlur = null;
+  }
+  /**
+   * The window blur event.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static onLostFocus(event: Event): void {
+    if (!this._scene) return;
+    if (!this._scene.running) {
+      this._sceneStateOnBlur = "paused";
+      return;
+    }
+  }
+  /**
+   * The window resize event.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static onResize(event: Event): void {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    this.resize(w, h);
   }
   /**
    * Renders the scene.
@@ -360,9 +393,7 @@ export abstract class SceneManager {
    *
    * @returns void
    */
-  private static save(): void {
-    console.log(arguments);
-  }
+  private static save(): void {}
   /**
    * Sets the fixed step.
    *
@@ -373,7 +404,18 @@ export abstract class SceneManager {
    */
   private static setFixedStep(frameRate: number): void {
     this._fixedStep = 1 / frameRate;
-    console.info(this._fixedStep);
+  }
+  /**
+   * Sets up the event handlers.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static setupEventHandlers(): void {
+    window.addEventListener("blur", this.onLostFocus.bind(this));
+    window.addEventListener("focus", this.onFocus.bind(this));
+    window.addEventListener("resize", this.onResize.bind(this));
   }
   /**
    * Calls the fpsmeter component tick() method.
@@ -399,6 +441,14 @@ export abstract class SceneManager {
       this._fpsmeter.tickStart();
     }
   }
+  /**
+   * Toggles the graphics buffer state.
+   * 
+   * 
+   * 
+   * @param buffered Tells whether the graphics should be buffered or not.
+   * @returns void
+   */
   private static toggleCanvasBuffer(buffered: boolean): void {
     if (buffered) {
       this.createCanvasBuffer();
@@ -425,6 +475,37 @@ export abstract class SceneManager {
     }
   }
   /**
+   * Toggles the GUI visibility.
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  private static toggleGui(): void {
+    this._controlPanelVisible = !this._controlPanelVisible;
+    if (!this._controlPanel) return;
+    if (this._controlPanelVisible) {
+      this._controlPanel.hide();
+    } else {
+      this._controlPanel.show();
+    }
+  }
+  /**
+   * Toggles the scene.
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  private static toggleScene(): void {
+    if (!this._scene) return;
+    if (this._scene.running) {
+      this._scene.pause();
+    } else {
+      this._scene.play();
+    }
+  }
+  /**
    * Updates the scene.
    *
    *
@@ -433,51 +514,38 @@ export abstract class SceneManager {
    * @returns void
    */
   private static update(time: number): void {
-    if (this._scene && this._scene.running) {
-      this._scene.update(time);
+    let deltaTime = (time - this._time) / 1000;
+    this._time = time;
+    this._timeAcc += deltaTime;
+    while (this._timeAcc >= this._fixedStep) {
+      this._timeAcc -= this._fixedStep;
+      if (this._scene && this._scene.running) {
+        this._scene.update(this._fixedStep);
+      }
     }
+    this.render();
   }
   /**
-   * The window blur event.
+   * Updates the inputs.
    *
    *
    *
+   * @param time The value of time that has passed (in ms).
    * @returns void
    */
-  private static windowBlurEvent(): void {
-    if (!this._scene) return;
-    if (!this._scene.running) {
-      this._sceneStateOnBlur = "paused";
-      return;
+  private static updateInput(time: number): void {
+    Keyboard.update();
+    Mouse.update();
+    if (Keyboard.trigger("control")) {
+      this.toggleScene();
     }
-  }
-  /**
-   * The window focus event.
-   *
-   *
-   *
-   * @returns void
-   */
-  private static windowFocusEvent(): void {
-    if (!this._scene) return;
-    if (!this._sceneStateOnBlur || this._sceneStateOnBlur === "paused") {
-      this._sceneStateOnBlur = null;
-      return;
+    if (Keyboard.trigger("fps")) {
+      Options.Frame.visible = !Options.Frame.visible;
+      this.toggleFpsmeter(Options.Frame.visible);
     }
-    this._scene.play();
-    this._sceneStateOnBlur = null;
-  }
-  /**
-   * The window resize event.
-   *
-   *
-   *
-   * @returns void
-   */
-  private static windowResizeEvent(): void {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    this.resize(w, h);
+    if (Keyboard.trigger("gui")) {
+      this.toggleGui();
+    }
   }
 }
 /**
