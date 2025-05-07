@@ -190,9 +190,9 @@ export class ParticleScene2 extends SceneBase {
   public initialize(): void {
     if (!this._assets) {
       this._assets = Assets.create(
-        "/assets/palette.json",
-        "/assets/palette.ladygaga.json",
-        "/assets/palette.taylorswift.json"
+        "./assets/palette.json",
+        "./assets/palette.ladygaga.json",
+        "./assets/palette.taylorswift.json"
       );
     }
     this._mouse.x = this.width / 2;
@@ -250,7 +250,7 @@ export class ParticleScene2 extends SceneBase {
         for (let p of JSON.parse(json)) {
           palette[p.name] = p.colors;
         }
-        k = k.replace("/assets/", "").replace(".json", "");
+        k = k.replace("./assets/", "").replace(".json", "");
         initial = initial || palette;
         this._palette[k] = palette;
       }
