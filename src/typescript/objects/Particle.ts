@@ -1,12 +1,13 @@
 import { Vector2 } from "../core";
+import { mod } from "../utils";
 import { Color } from "./Color";
 /**
  * A callback function for rendering a particle.
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
  * @callback
  * @returns void
  */
@@ -23,8 +24,28 @@ export interface ParticleRenderCallback<T extends Particle> {
  * @class
  */
 export class Particle extends Vector2 {
+  private _rotation: number = 0;
+  /**
+   * Gets or sets the mass of the particle.
+   *
+   * @returns number
+   */
   public mass: number;
+  /**
+   * Gets or sets the radius of the particle.
+   *
+   * @returns number
+   */
   public radius: number;
+  /**
+   * Gets or sets the rotation velocity of the particle.
+   */
+  public rotationVelocity: number;
+  /**
+   * Gets or sets the velocity of the particle.
+   *
+   * @returns number
+   */
   public velocity: Vector2;
   /**
    * Creates a new instance of Particle class.
@@ -42,6 +63,31 @@ export class Particle extends Vector2 {
     this.mass = 0;
     this.radius = radius;
     this.velocity = new Vector2(0, 0);
+    this.rotationVelocity = Math.atan2(this.velocity.y, this.velocity.x);
+  }
+  /**
+   * Gets the rotation of the particle.
+   *
+   * @returns number
+   */
+  public get rotation(): number {
+    return this._rotation;
+  }
+  /**
+   * Resets the rotation of the particle.
+   *
+   * @returns void
+   */
+  public resetRotation(): void {
+    this._rotation = 0;
+  }
+  /**
+   * Rotates the particle.
+   *
+   * @returns void
+   */
+  public rotate(): void {
+    this._rotation = mod(this._rotation + this.rotationVelocity, Math.PI * 2);
   }
 }
 /**
@@ -135,8 +181,8 @@ export class PolygonalParticle extends Particle {
     } else {
       let step = (Math.PI * 2) / this._sides;
       for (let angle = 0; angle <= Math.PI * 2; angle += step) {
-        let px = this.x + Math.cos(angle) * this.radius;
-        let py = this.y + Math.sin(angle) * this.radius;
+        let px = this.x + Math.cos(angle + this.rotation) * this.radius;
+        let py = this.y + Math.sin(angle + this.rotation) * this.radius;
         if (angle === 0) {
           path.moveTo(px, py);
         } else {
