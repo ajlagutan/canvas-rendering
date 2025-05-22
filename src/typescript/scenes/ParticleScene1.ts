@@ -195,16 +195,60 @@ export class ParticleScene1 extends SceneBase {
  * @namespace
  */
 namespace Options {
+  /**
+   * Particle options for the scene.
+   *
+   * @abstract
+   * @class
+   */
   export abstract class Particles {
-    public static count: number = 100;
+    /**
+     * Gets or sets the particle count.
+     *
+     * @returns number
+     */
+    public static count: number = 5;
+    /**
+     * Gets or sets the maximum distance of each particles.
+     *
+     * @returns number
+     */
     public static maxDistance: number = 150;
-    public static maxVelocity: number = 300;
-    public static radius: number = 10;
+    /**
+     * Gets or sets the maximum velocity of each particles.
+     *
+     * @returns number
+     */
+    public static maxVelocity: number = 100;
+    /**
+     * Gets or sets the radius of each particles.
+     *
+     * @returns number
+     */
+    public static radius: number = 60;
+    /**
+     * Gets or sets the number of sides of each polygonal particles.
+     */
     public static sides: number = 6;
   }
-
+  /**
+   * Global options for the scene.
+   *
+   * @abstract
+   * @class
+   */
   export abstract class Scene {
+    /**
+     * Gets or sets the background color of the scene.
+     *
+     * @returns string
+     */
     public static background: string = "#ffffff";
+    /**
+     * Gets or sets the foreground color of the scene.
+     *
+     * @returns string
+     */
     public static foreground: string = "#000000";
   }
 }
