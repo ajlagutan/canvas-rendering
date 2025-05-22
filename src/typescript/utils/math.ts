@@ -1,5 +1,8 @@
 /**
  * Clamps a value between the minimum and maximum value.
+ * 
+ * 
+ * 
  * @param value The current value to clamp.
  * @param min The minimum value.
  * @param max The maximum value.
@@ -9,6 +12,9 @@ export function clamp(value: number, min: number, max: number): number {
 }
 /**
  * Computes the distance between the initial and final coordinates.
+ * 
+ * 
+ * 
  * @param sx The initial x-coordinate.
  * @param sy The initial y-coordinate.
  * @param dx The final x-coordinate.
@@ -26,6 +32,9 @@ export function distance(
 }
 /**
  * Computes the distance between the initial and final coordinates without using {@link Math.sqrt} method.
+ * 
+ * 
+ * 
  * @param sx The initial x-coordinate.
  * @param sy The initial y-coordinate.
  * @param dx The final x-coordinate.
@@ -38,4 +47,16 @@ export function distance2(
   dy: number
 ): number {
   return (dx - sx) * (dx - sx) + (dy - sy) * (dy - sy);
+}
+/**
+ * Computes the remainder of the dividend and divisor using the modulo operator.
+ * 
+ * 
+ * 
+ * @param dividend The dividend value.
+ * @param divisor The divisor value.
+ * @returns number
+ */
+export function mod(dividend: number, divisor: number): number {
+  return ((dividend % divisor) + divisor) % divisor;
 }
