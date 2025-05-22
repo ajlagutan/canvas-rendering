@@ -15,6 +15,13 @@ export class Vector2 {
     this.x = x;
     this.y = y;
   }
+  /**
+   * Creates a string representation of the Vector2 object.
+   * @returns string
+   */
+  public toString(): string {
+    return `[x: ${this.x}, y: ${this.y}]`
+  }
 }
 /**
  * Represents a vector with three single-precision floating-point values.
@@ -37,6 +44,13 @@ export class Vector3 {
     this.y = y;
     this.z = z;
   }
+  /**
+   * Creates a string representation of the Vector3 object.
+   * @returns string
+   */
+  public toString(): string {
+    return `[x: ${this.x}, y: ${this.y}, z: ${this.z}]`
+  }
 }
 /**
  * Represents a vector with four single-precision floating-point values.
@@ -55,5 +69,12 @@ export class Vector4 {
     this.y = y;
     this.z = z;
     this.w = w;
+  }
+  /**
+   * Creates a string representation of the Vector4 object.
+   * @returns string
+   */
+  public toString(): string {
+    return `[x: ${this.x}, y: ${this.y}, z: ${this.z}, w: ${this.w}]`
   }
 }
