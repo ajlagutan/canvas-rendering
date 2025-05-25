@@ -1,5 +1,17 @@
 import * as lil from "lil-gui";
 /**
+ * The constructor of {@link SceneBase} class.
+ *
+ *
+ *
+ *
+ *
+ * @returns SceneBase
+ */
+export interface SceneConstructor {
+  new (width?: number, height?: number): SceneBase;
+}
+/**
  * An abstract class that stores and manipulate data that
  * can be updated and rendered on an HTML Canvas element.
  *
@@ -12,40 +24,21 @@ import * as lil from "lil-gui";
  */
 export abstract class SceneBase {
   private _height: number = 0;
+  private _initialized: boolean = false;
   private _running: boolean = false;
   private _width: number = 0;
   /**
-   * Gets the display author of the scene.
-   * 
-   * 
-   * 
-   * @returns string | null
-   * @default null
+   * Creates a new instance of SceneBase object.
+   *
+   *
+   *
+   * @constructor
+   * @param width The scene width.
+   * @param height The scene height.
    */
-  public get displayAuthor(): string | null {
-    return null;
-  }
-  /**
-   * Gets the display description of the scene.
-   * 
-   * 
-   * 
-   * @returns string | null
-   * @default null
-   */
-  public get displayDescription(): string | null {
-    return null;
-  }
-  /**
-   * Gets the display title of the scene.
-   * 
-   * 
-   * 
-   * @returns string | null
-   * @default null
-   */
-  public get displayTitle(): string | null {
-    return null;
+  constructor(width?: number, height?: number) {
+    this._width = width ?? window.innerWidth;
+    this._height = height ?? window.innerHeight;
   }
   /**
    * Gets the current height of the scene.
@@ -56,6 +49,16 @@ export abstract class SceneBase {
    */
   public get height(): number {
     return this._height;
+  }
+  /**
+   * Gets the state of scene, whether it needs to be initialized.
+   *
+   *
+   *
+   * @returns boolean
+   */
+  public get initialized(): boolean {
+    return this._initialized;
   }
   /**
    * Gets the state of the scene.
@@ -95,7 +98,9 @@ export abstract class SceneBase {
    *
    * @returns void
    */
-  public initialize(): void {}
+  public initialize(): void {
+    this._initialized = true;
+  }
   /**
    * Pauses the scene.
    *
@@ -128,7 +133,9 @@ export abstract class SceneBase {
    * @param context The canvas rendering context.
    * @returns void
    */
-  public render(context: CanvasRenderingContext2D): void {}
+  public render(context: CanvasRenderingContext2D): void {
+    context.clearRect(0, 0, this._width, this._height);
+  }
   /**
    * Resizes the scene's viewport width and height components.
    *
