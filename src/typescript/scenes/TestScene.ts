@@ -66,6 +66,8 @@ export class TestScene extends SceneBase {
 
     this.updateCartesianGrid();
     this.updateCartesianPlane();
+
+    super.initialize();
   }
 
   public render(context: CanvasRenderingContext2D): void {
