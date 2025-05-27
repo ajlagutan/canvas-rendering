@@ -10,13 +10,13 @@
 - [ ] Add scene manager module. [2025-05-27] ()  
 - [ ] Add graphics module. [2025-05-27] ()  
 - [ ] Add canvas renderer class. [2025-05-27] ()  
-- [ ] Add displayable object class. [2025-05-27] ()  
-- [ ] Add displayable object container class. [2025-05-27] ()  
 
 ### In Progress
 
+- [ ] Add displayable object container class. [2025-05-27] (2025-05-27)  
 
 ### Done ✓
 
-- [x] Restructure typescript code namespaces. [2025-05-27] ()  
+- [x] Restructure typescript code namespaces. [2025-05-27] (2025-05-27)  
+- [x] Add displayable object class. [2025-05-27] (2025-05-27)  
 
