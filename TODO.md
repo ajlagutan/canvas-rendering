@@ -13,10 +13,10 @@
 
 ### In Progress
 
-- [ ] Add displayable object container class. [2025-05-27] (2025-05-27)  
 
 ### Done ✓
 
 - [x] Restructure typescript code namespaces. [2025-05-27] (2025-05-27)  
 - [x] Add displayable object class. [2025-05-27] (2025-05-27)  
+- [x] Add displayable object container class. [2025-05-27] (2025-05-27)  
 
