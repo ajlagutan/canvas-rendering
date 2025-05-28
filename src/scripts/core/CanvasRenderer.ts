@@ -84,7 +84,7 @@ export class CanvasRenderer {
       canvas.style.top = "0";
       document.body.append(canvas);
     }
-    this._autoClear = !!!autoClear;
+    this._autoClear = !!autoClear;
     this._autoClearColor = autoClearColor ?? "black";
     this._buffered = !!buffered;
     this._dom = canvas;
