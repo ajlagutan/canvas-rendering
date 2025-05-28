@@ -1,3 +1,4 @@
+import "fpsmeter";
 import { logger } from "./_utils";
 import { CanvasRenderer } from "./CanvasRenderer";
 import { DisplayableObject } from "./DisplayableObject";
@@ -12,6 +13,9 @@ import { DisplayableObject } from "./DisplayableObject";
 export class Graphics {
   private static _buffered: boolean = false;
   private static _canvas?: HTMLCanvasElement;
+  private static _fpsmeter: FPSMeter;
+  private static _fpsmeterBox: HTMLDivElement;
+  private static _fpsmeterVisible: boolean = true;
   private static _frameCount: number = 0;
   private static _maxSkip: number = 3;
   private static _rendered: boolean = false;
@@ -86,7 +90,7 @@ export class Graphics {
       this.setupEventListeners();
       this.initializeRenderer();
       this.initializeFpsmeter();
-      
+
       this.resize();
 
       logger.debug.call(this, "initialized.");
@@ -150,6 +154,49 @@ export class Graphics {
     }
   }
   /**
+   * Calls the {@link FPSMeter.tick} method.
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  public static tickEnd(): void {
+    if (this._fpsmeter && this._fpsmeterVisible) {
+      this._fpsmeter.tick();
+    }
+  }
+  /**
+   * Calls the {@link FPSMeter.tickStart} method.
+   * 
+   * 
+   * 
+   * @returns void
+   */
+  public static tickStart(): void {
+    if (this._fpsmeter && this._fpsmeterVisible) {
+      this._fpsmeter.tickStart();
+    }
+  }
+  /**
+   * Toggles the {@link FPSMeter} component's visibility.
+   * 
+   * 
+   * 
+   * @param visible Tells whether the toggling should be forced the visibility.
+   * @returns void
+   */
+  public static toggleFPSMeter(visible?: boolean): void {
+    if (!this._fpsmeter || !this._fpsmeterBox) return;
+    this._fpsmeterVisible = visible ?? !this._fpsmeterVisible;
+    if (this._fpsmeterVisible) {
+      this._fpsmeter.show();
+      this._fpsmeterBox.style.display = "block";
+    } else {
+      this._fpsmeter.hide();
+      this._fpsmeterBox.style.display = "none";
+    }
+  }
+  /**
    * Initializes the main canvas component.
    *
    *
@@ -192,6 +239,31 @@ export class Graphics {
   private static initializeFpsmeter(): void {
     try {
       logger.debug.call(this, "fpsmeter:", "initializing...");
+
+      const options: FPSMeterOptions = {
+        left: "20px",
+        graph: 1,
+        decimals: 0,
+        theme: "transparent",
+        toggleOn: undefined,
+      };
+
+      //  Create the background element for the FPSMeter component.
+      this._fpsmeterBox = document.createElement("div");
+      this._fpsmeterBox.id = "fpsmeter-box";
+      this._fpsmeterBox.style.display = "block";
+      this._fpsmeterBox.style.position = "absolute";
+      this._fpsmeterBox.style.top = "0";
+      this._fpsmeterBox.style.left = "15px";
+      this._fpsmeterBox.style.width = "129px";
+      this._fpsmeterBox.style.height = "50px";
+      this._fpsmeterBox.style.zIndex = "9";
+      document.body.append(this._fpsmeterBox);
+
+      //  Create the FPSMeter component.
+      this._fpsmeter = new FPSMeter(document.body, options);
+      this.toggleFPSMeter();
+
       logger.debug.call(this, "fpsmeter:", "initialized.");
     } catch (error) {
       console.error(error);
