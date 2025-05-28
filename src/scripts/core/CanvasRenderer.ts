@@ -82,6 +82,7 @@ export class CanvasRenderer {
       canvas.style.zIndex = "-1";
       canvas.style.left = "0";
       canvas.style.top = "0";
+      document.body.append(canvas);
     }
     this._autoClear = !!!autoClear;
     this._autoClearColor = autoClearColor ?? "black";
