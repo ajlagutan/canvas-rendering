@@ -2,10 +2,10 @@
 
 ### Todo
 
+- [ ] Add data manager module. [2025-05-29] ()  
 - [ ] Add mouse input module. [2025-05-27] ()  
 - [ ] Add keyboard input module. [2025-05-27] ()  
 - [ ] Implement lil-GUI plugin on scene manager module. [2025-05-27] ()  
-- [ ] Add scene base class. [2025-05-27] ()  
 - [ ] Add scene manager module. [2025-05-27] ()  
 
 ### In Progress
@@ -19,4 +19,5 @@
 - [x] Add canvas renderer class. [2025-05-27] (2025-05-28)  
 - [x] Add graphics module. [2025-05-27] (2025-05-28)  
 - [x] Implement FPSMeter plugin on graphics module. [2025-05-27] (2025-05-28)  
+- [x] Add scene base class. [2025-05-27] (2025-05-29)  
 
