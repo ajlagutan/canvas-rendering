@@ -50,3 +50,15 @@ export namespace logger {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+/**
+ * Computes the remainder of the dividend and divisor using the modulo operator.
+ *
+ *
+ *
+ * @param dividend The dividend value.
+ * @param divisor The divisor value.
+ * @returns number
+ */
+export function mod(dividend: number, divisor: number): number {
+  return ((dividend % divisor) + divisor) % divisor;
+}
