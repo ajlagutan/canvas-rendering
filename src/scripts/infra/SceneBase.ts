@@ -1,4 +1,5 @@
 import { DisplayableObject } from "../core/DisplayableObject";
+import { DataManager } from "./DataManager";
 /**
  * An interface for constructing a scene.
  *
@@ -19,7 +20,6 @@ export interface SceneConstructor {
  */
 export abstract class SceneBase extends DisplayableObject {
   private _initializing: boolean = false;
-  private _loading: boolean = true;
   private _ready: boolean = false;
   private _suspended: boolean = true;
   /**
@@ -30,7 +30,7 @@ export abstract class SceneBase extends DisplayableObject {
    * @returns boolean
    */
   public isbusy(): boolean {
-    return this._loading || this._initializing;
+    return DataManager.isbusy() || this._initializing;
   }
   /**
    * Checks whether the scene is ready.
@@ -60,7 +60,8 @@ export abstract class SceneBase extends DisplayableObject {
    * @returns void
    */
   public load(): void {
-    this._loading = true;
+    this._initializing = true;
+    this.initialize();
   }
   /**
    * Continues the scene updates.
@@ -99,6 +100,7 @@ export abstract class SceneBase extends DisplayableObject {
    * @returns void
    */
   protected initialize(): void {
+    this._initializing = false;
     this._ready = true;
   }
 }
