@@ -14,7 +14,6 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/fpsmeter": "^0.3.34",
-    "lil-gui": "^0.20.0",
     "sass": "^1.86.3",
     "typescript": "^5.8.3",
     "vite": "^6.3.1"
@@ -22,6 +21,7 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "fpsmeter": "^0.3.1",
+    "lil-gui": "^0.20.0",
     "url-join": "^5.0.0"
   }
 }
