@@ -117,6 +117,17 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 /**
+ * Converts a degree value to radian.
+ * 
+ * 
+ * 
+ * @param deg The value to convert to radian.
+ * @returns number
+ */
+export function deg2rad(deg: number): number {
+  return deg * (Math.PI / 180);
+}
+/**
  * Computes the remainder of the dividend and divisor using the modulo operator.
  *
  *
@@ -127,4 +138,15 @@ export function clamp(value: number, min: number, max: number): number {
  */
 export function mod(dividend: number, divisor: number): number {
   return ((dividend % divisor) + divisor) % divisor;
+}
+/**
+ * Converts a radian value to degree.
+ * 
+ * 
+ * 
+ * @param rad The value to convert to degree.
+ * @returns number
+ */
+export function rad2deg(rad: number): number {
+  return rad * (180 / Math.PI);
 }
