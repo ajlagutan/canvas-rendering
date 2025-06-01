@@ -4,7 +4,6 @@
 
 - [ ] Add mouse input module. [2025-05-27] ()  
 - [ ] Add keyboard input module. [2025-05-27] ()  
-- [ ] Implement lil-GUI plugin on scene manager module. [2025-05-27] ()  
 
 ### In Progress
 
@@ -22,4 +21,5 @@
 - [x] Add data manager module. [2025-05-29] (2025-05-30)  
 - [x] Integrate data manager module in scene base class. [2025-05-30] (2025-05-30)  
 - [x] Add loading display in graphics module. [2025-05-30] (2025-06-01)  
+- [x] Implement lil-GUI plugin on scene manager module. [2025-05-27] (2025-06-01)  
 

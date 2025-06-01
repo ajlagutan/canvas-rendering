@@ -64,6 +64,23 @@ export class Graphics {
     }
   }
   /**
+   * Gets or sets whether the graphics will show the FPSMeter component.
+   * 
+   * 
+   * 
+   * @property
+   * @returns boolean
+   */
+  public static get fpsMeterVisible(): boolean {
+    return this._fpsmeterVisible;
+  }
+  public static set fpsMeterVisible(value: boolean) {
+    if (this._fpsmeterVisible !== value) {
+      this._fpsmeterVisible = value;
+      this.toggleFPSMeter(value);
+    }
+  }
+  /**
    * Gets the total frames rendered.
    *
    *

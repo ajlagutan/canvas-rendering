@@ -1,5 +1,8 @@
+import * as lil from "lil-gui";
+import * as scenes from "../app";
 import { Graphics } from "./../core/Graphics";
 import { SceneBase, SceneConstructor } from "./SceneBase";
+import { logger } from "../core/_utils";
 /**
  * Fixed step.
  *
@@ -18,9 +21,12 @@ const FIXED_STEP: number = 1 / 60;
  */
 export class SceneManager {
   private static _cache: Map<SceneConstructor, SceneBase> = new Map();
+  private static _gui: lil.GUI;
   private static _nextScene: SceneBase | null;
   private static _scene: SceneBase | null;
+  private static _sceneGui: lil.GUI | null;
   private static _sceneStarted: boolean;
+  private static _stageGui: lil.GUI | null;
   private static _suspended: boolean;
   /**
    * This is a static class.
@@ -33,6 +39,30 @@ export class SceneManager {
    */
   constructor() {
     throw new Error("This is a static class.");
+  }
+  /**
+   * Gets or sets the current scene.
+   *
+   *
+   *
+   * @property
+   * @returns string | null
+   */
+  public static get scene(): string | null {
+    if (this._scene) {
+      return this._scene.constructor.name;
+    }
+    return null;
+  }
+  public static set scene(value: typeof SceneBase | string | null) {
+    if (value instanceof SceneBase) {
+      value = value.constructor.name;
+    }
+    if (typeof value === "string") {
+      this.goto(scenes[value]);
+      return;
+    }
+    this.goto(undefined);
   }
   /**
    * Commands the scene manager to change to the scene.
@@ -80,6 +110,7 @@ export class SceneManager {
   private static changeScene(): void {
     if (this.isSceneChanging() && !this.isCurrentSceneBusy()) {
       if (this._scene) {
+        this.destroySceneGui();
         this._scene.stop();
       }
       this._scene = this._nextScene;
@@ -94,6 +125,44 @@ export class SceneManager {
     }
   }
   /**
+   * Creates a GUI component for the current scene.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static createSceneGui(): void {
+    if (this._scene) {
+      this._sceneGui = this._gui.addFolder("scene");
+      this._sceneGui.hide();
+
+      this._scene.controllers(this._sceneGui);
+
+      const name = this._scene.constructor.name;
+      const options = localStorage.getItem(`./Scene/${name}`);
+      if (options) {
+        this._sceneGui.load(JSON.parse(options), true);
+      }
+
+      if (this._sceneGui.children.length > 0) {
+        this._sceneGui.show();
+      }
+    }
+  }
+  /**
+   * Destroys the GUI component.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static destroySceneGui(): void {
+    if (this._sceneGui) {
+      this.saveScene();
+      this._sceneGui.destroy();
+    }
+  }
+  /**
    * Initializes the scene manager.
    *
    *
@@ -101,7 +170,17 @@ export class SceneManager {
    * @returns void
    */
   private static initialize(): void {
-    this.initializeGraphics();
+    try {
+      logger.debug.call(this, "initializing...");
+
+      this.initializeGraphics();
+      this.initializeGui();
+      this.setupEventListeners();
+
+      logger.debug.call(this, "initialized.");
+    } catch (error) {
+      console.error(error);
+    }
   }
   /**
    * Initializes the graphics components.
@@ -112,6 +191,38 @@ export class SceneManager {
    */
   private static initializeGraphics(): void {
     Graphics.initialize();
+  }
+  /**
+   * Initializes the GUI component.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static initializeGui(): void {
+    try {
+      logger.debug.call(this, "gui:", "initializing...");
+
+      this._gui = new lil.GUI({ title: "controls" });
+      this._gui.add(Graphics, "fpsMeterVisible").name("show fps");
+
+      this._stageGui = this._gui.addFolder("stage");
+      this._stageGui.add(Graphics, "buffered").name("use buffer");
+      this._stageGui
+        .add(this, "scene", Object.keys(scenes))
+        .name("scene")
+        .listen();
+
+      const name = SceneManager.name;
+      const options = localStorage.getItem(`./${name}`);
+      if (options) {
+        this._stageGui.load(JSON.parse(options), true);
+      }
+
+      logger.debug.call(this, "gui:", "initialized.");
+    } catch (error) {
+      console.error(error);
+    }
   }
   /**
    * Checks if the current scene is busy.
@@ -144,6 +255,17 @@ export class SceneManager {
     return !!this._nextScene;
   }
   /**
+   * Fires up before the browser unloads the page.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static onbeforeunload(): void {
+    this.save();
+    this.saveScene();
+  }
+  /**
    * Renders the current scene.
    *
    *
@@ -169,6 +291,51 @@ export class SceneManager {
   private static requestUpdate(): void {
     if (!this._suspended) {
       requestAnimationFrame(this.update.bind(this));
+    }
+  }
+  /**
+   * Saves the stage GUI component configurations.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static save(): void {
+    if (this._stageGui) {
+      const name = SceneManager.name;
+      const options = JSON.stringify(this._stageGui.save(false));
+      localStorage.setItem(`./${name}`, options);
+    }
+  }
+  /**
+   * Saves the scene GUI component configurations.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static saveScene(): void {
+    if (this._scene && this._sceneGui) {
+      this._scene.save(this._sceneGui);
+    }
+  }
+  /**
+   * Sets up the event listeners.
+   *
+   *
+   *
+   * @private
+   * @returns void
+   */
+  private static setupEventListeners(): void {
+    try {
+      logger.debug.call(this, "events:", "handling...");
+
+      window.addEventListener("beforeunload", this.onbeforeunload.bind(this));
+
+      logger.debug.call(this, "events:", "handled.");
+    } catch (error) {
+      console.error(error);
     }
   }
   /**
@@ -225,6 +392,7 @@ export class SceneManager {
   private static updateScene(): void {
     if (this._scene) {
       if (!this._sceneStarted && this._scene.isready()) {
+        this.createSceneGui();
         this._scene.start();
         this._sceneStarted = true;
         Graphics.endLoading();

@@ -1,3 +1,4 @@
+import * as lil from "lil-gui";
 import { DisplayableObject } from "../core/DisplayableObject";
 import { DataManager } from "./DataManager";
 /**
@@ -19,7 +20,6 @@ export interface SceneConstructor {
  * @class
  */
 export abstract class SceneBase extends DisplayableObject {
-  private _initializing: boolean = false;
   private _ready: boolean = false;
   private _suspended: boolean = true;
   /**
@@ -30,7 +30,7 @@ export abstract class SceneBase extends DisplayableObject {
    * @returns boolean
    */
   public isbusy(): boolean {
-    return DataManager.isbusy() || this._initializing;
+    return DataManager.isbusy();
   }
   /**
    * Checks whether the scene is ready.
@@ -53,6 +53,15 @@ export abstract class SceneBase extends DisplayableObject {
     return this._suspended;
   }
   /**
+   * Initializes the GUI that controls different properties of the scene.
+   * 
+   * 
+   * 
+   * @param folder The {@link lil.GUI} component assigned for the scene.
+   * @returns void
+   */
+  public controllers(folder: lil.GUI): void {}
+  /**
    * Loads the scene assets.
    *
    *
@@ -60,8 +69,20 @@ export abstract class SceneBase extends DisplayableObject {
    * @returns void
    */
   public load(): void {
-    this._initializing = true;
     this.initialize();
+  }
+  /**
+   * Saves the scene state.
+   * 
+   * 
+   * 
+   * @param folder The {@link lil.GUI} component assigned for the scene.
+   * @returns void
+   */
+  public save(folder: lil.GUI): void {
+    const name = this.constructor.name;
+    const options = JSON.stringify(folder.save(true));
+    localStorage.setItem(`./Scene/${name}`, options);
   }
   /**
    * Continues the scene updates.
@@ -100,7 +121,6 @@ export abstract class SceneBase extends DisplayableObject {
    * @returns void
    */
   protected initialize(): void {
-    this._initializing = false;
     this._ready = true;
   }
 }
