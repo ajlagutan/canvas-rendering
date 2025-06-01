@@ -1,7 +1,15 @@
 import "fpsmeter";
-import { logger } from "./_utils";
+import { clamp, logger, mod } from "./_utils";
 import { CanvasRenderer } from "./CanvasRenderer";
 import { DisplayableObject } from "./DisplayableObject";
+/**
+ * The loading display text.
+ *
+ *
+ *
+ * @constant
+ */
+const LOADING_TEXT = "loading scene";
 /**
  * A static class that handles canvas related functions.
  *
@@ -17,10 +25,16 @@ export class Graphics {
   private static _fpsmeterBox: HTMLDivElement;
   private static _fpsmeterVisible: boolean = true;
   private static _frameCount: number = 0;
+  private static _height: number = 0;
+  private static _loadingCount: number = 0;
+  private static _loadingState: number = -1;
+  private static _loadingStep: number = 0.5;
   private static _maxSkip: number = 3;
   private static _rendered: boolean = false;
   private static _renderer: CanvasRenderer;
   private static _skipCount: number = 0;
+  private static _upperCanvas?: HTMLCanvasElement;
+  private static _width: number = 0;
   /**
    * This is a static class.
    *
@@ -74,24 +88,40 @@ export class Graphics {
     return this._rendered;
   }
   /**
+   * Erases the loading display.
+   *
+   *
+   *
+   * @returns void
+   */
+  public static endLoading(): void {
+    this.clearUpperCanvas();
+    if (this._upperCanvas) {
+      this._upperCanvas.style.opacity = "0";
+    }
+  }
+  /**
    * Initializes the graphics components.
    *
    *
    *
    * @public
-   * @param props The initialization properties of Graphics class.
    * @returns void
    */
-  public static initialize(): void {
+  public static initialize(width?: number, height?: number): void {
     try {
       logger.debug.call(this, "initializing...");
 
+      this._width = width || window.innerWidth;
+      this._height = height || window.innerHeight;
+
       this.initializeCanvas();
+      this.initializeUpperCanvas();
       this.setupEventListeners();
       this.initializeRenderer();
       this.initializeFpsmeter();
 
-      this.resize();
+      this.resize(this._width, this._height);
 
       logger.debug.call(this, "initialized.");
     } catch (error) {
@@ -146,6 +176,12 @@ export class Graphics {
         this._canvas.style.width = width + "px";
         this._canvas.style.height = height + "px";
       }
+      if (!!this._upperCanvas) {
+        this._upperCanvas.width = width;
+        this._upperCanvas.height = height;
+        this._upperCanvas.style.width = width + "px";
+        this._upperCanvas.style.height = height + "px";
+      }
 
       logger.debug.call(this, "resized.");
       logger.debug.call(this, `w: ${width}px`, `h: ${height}px`);
@@ -154,10 +190,21 @@ export class Graphics {
     }
   }
   /**
+   * Initializes the loading display.
+   *
+   *
+   *
+   * @returns void
+   */
+  public static startLoading(): void {
+    this._loadingState = 0;
+    this._loadingCount = 0;
+  }
+  /**
    * Calls the {@link FPSMeter.tick} method.
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @returns void
    */
   public static tickEnd(): void {
@@ -167,9 +214,9 @@ export class Graphics {
   }
   /**
    * Calls the {@link FPSMeter.tickStart} method.
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @returns void
    */
   public static tickStart(): void {
@@ -179,9 +226,9 @@ export class Graphics {
   }
   /**
    * Toggles the {@link FPSMeter} component's visibility.
-   * 
-   * 
-   * 
+   *
+   *
+   *
    * @param visible Tells whether the toggling should be forced the visibility.
    * @returns void
    */
@@ -194,6 +241,44 @@ export class Graphics {
     } else {
       this._fpsmeter.hide();
       this._fpsmeterBox.style.display = "none";
+    }
+  }
+  /**
+   * Updates the loading display.
+   *
+   *
+   *
+   * @returns void
+   */
+  public static updateLoading(): void {
+    if (this._loadingState === 0) {
+      if (this._loadingCount > 20) {
+        this._loadingState = 1;
+      }
+    } else if (this._loadingState === 1) {
+      if (30 <= this._loadingCount || this._loadingCount <= 20) {
+        this._loadingStep = -this._loadingStep;
+      }
+    }
+    this._loadingCount += this._loadingStep;
+    this.paintUpperCanvas();
+    if (this._upperCanvas) {
+      this._upperCanvas.style.opacity = "1";
+    }
+  }
+  /**
+   * Clears the upper canvas component display.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static clearUpperCanvas(): void {
+    if (this._upperCanvas) {
+      let context = this._upperCanvas.getContext("2d");
+      if (context) {
+        context.clearRect(0, 0, this._width, this._height);
+      }
     }
   }
   /**
@@ -294,6 +379,28 @@ export class Graphics {
     }
   }
   /**
+   * Initializes the upper canvas component.
+   */
+  private static initializeUpperCanvas(): void {
+    try {
+      logger.debug.call(this, "upper canvas:", "initializing...");
+
+      this._upperCanvas = document.createElement("canvas");
+      this._upperCanvas.id = "upper-canvas";
+      this._upperCanvas.style.imageRendering = "pixelated";
+      this._upperCanvas.style.position = "fixed";
+      this._upperCanvas.style.opacity = "0";
+      this._upperCanvas.style.zIndex = "0";
+      this._upperCanvas.style.left = "0";
+      this._upperCanvas.style.top = "0";
+      document.body.append(this._upperCanvas);
+
+      logger.debug.call(this, "upper canvas:", "initialized.");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  /**
    * Fires up when the display had been resized.
    *
    *
@@ -305,6 +412,35 @@ export class Graphics {
    */
   private static onresize(e: Event): void {
     this.resize(window.innerWidth, window.innerHeight);
+  }
+  /**
+   * Draws the loading display.
+   *
+   *
+   *
+   * @returns void
+   */
+  private static paintUpperCanvas(): void {
+    this.clearUpperCanvas();
+    if (this._upperCanvas && this._loadingCount >= 20) {
+      let context = this._upperCanvas.getContext("2d");
+      if (context) {
+        let dx = this._width / 2;
+        let dy = this._height / 2;
+        let alpha = clamp((this._loadingCount - 20) / 30, 0, 1);
+        context.save();
+        context.globalAlpha = alpha;
+        context.font = "bold 24pt monospace";
+        context.textAlign = "center";
+        context.textBaseline = "alphabetic";
+        context.textRendering = "optimizeLegibility";
+        context.fillStyle = "white";
+        context.fillText(LOADING_TEXT, dx, dy);
+        context.strokeStyle = "black";
+        context.strokeText(LOADING_TEXT, dx, dy);
+        context.restore();
+      }
+    }
   }
   /**
    * Sets up the event listeners.

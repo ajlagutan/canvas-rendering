@@ -86,6 +86,7 @@ export class SceneManager {
       if (this._scene) {
         if (!this._scene.isready()) {
           this._scene.load();
+          Graphics.startLoading();
         }
         this._sceneStarted = false;
         this._nextScene = null;
@@ -154,7 +155,7 @@ export class SceneManager {
       if (this.isCurrentSceneStarted()) {
         Graphics.render(this._scene);
       } else {
-        //  Display loading bar here.
+        Graphics.updateLoading();
       }
     }
   }
@@ -226,6 +227,7 @@ export class SceneManager {
       if (!this._sceneStarted && this._scene.isready()) {
         this._scene.start();
         this._sceneStarted = true;
+        Graphics.endLoading();
       }
       if (this.isCurrentSceneStarted()) {
         this._scene.update(FIXED_STEP);

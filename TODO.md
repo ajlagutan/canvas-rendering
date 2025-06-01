@@ -8,7 +8,6 @@
 
 ### In Progress
 
-- [ ] Add loading display in graphics module [2025-05-30] ()  
 
 ### Done ✓
 
@@ -22,4 +21,5 @@
 - [x] Add scene manager module. [2025-05-27] (2025-05-29)  
 - [x] Add data manager module. [2025-05-29] (2025-05-30)  
 - [x] Integrate data manager module in scene base class. [2025-05-30] (2025-05-30)  
+- [x] Add loading display in graphics module. [2025-05-30] (2025-06-01)  
 
